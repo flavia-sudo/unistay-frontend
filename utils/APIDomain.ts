@@ -1,0 +1,1 @@
+export const ApiDomain = "https://hostel-backend-fyy3.onrender.com"
