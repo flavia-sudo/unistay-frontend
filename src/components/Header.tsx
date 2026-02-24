@@ -64,10 +64,10 @@ const Header = () => {
                 <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
                     <div className='flex items-center justify-between h-16'>
                         <NavLink to="/" className="flex items-center gap-2" data-testid="logo">
-                        <div className='w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify center'>
+                        <div className='w-10 h-10 bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify center'>
                             <FaBuilding className="w-8 h-8 text-white" />
                             </div>
-                            <span className='text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent'>UniStay</span>
+                            <span className='text-xl font-bold bg-linear-to-br from-indigo-600 to-purple-600 bg-clip-text text-transparent'>UniStay</span>
                             </NavLink>
                             <nav className="hidden md:flex space-x-8">
                                 <NavLink to="/" className={getLinkClass} data-testid="desktop-home">Home</NavLink>
