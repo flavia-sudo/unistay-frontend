@@ -10,6 +10,7 @@ import { Menu, X, MessageSquare, LogOut, Search } from 'lucide-react';
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [unreadMessages, setUnreadMessages] = useState(0);
     const token = localStorage.getItem('Token');
     const user = JSON.parse(localStorage.getItem('User') || '{}');
     const isAdmin = user.role === 'admin';
@@ -20,6 +21,29 @@ const Header = () => {
     useEffect(() => {
         setIsLoggedIn(!!token);
     }, [token, user]);
+
+    useEffect(() => {
+        if (isLoggedIn) {
+            loadUnreadMessages();
+        }
+    }, [isLoggedIn, token]);
+
+    const loadUnreadMessages = async () => {
+        try {
+            const messages = await fetch('/api/messages/unread', {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const data = await messages.json();
+            setUnreadMessages(data.length);
+            data.forEach((message: any) => {
+                if (!message.seen) {
+                    setUnreadMessages((prev) => prev + 1);
+                }
+            })
+        } catch (error) {}
+    }
 
     const handleLogout = () => {
         localStorage.removeItem('Token');
@@ -66,7 +90,12 @@ const Header = () => {
                                 <>
                                     <NavLink to="/messages" data-testid="desktop-messages" className="px-4 py-2 border rounded-md text-gray-700 hover:border-purple-600 transition-colors">
                                     <div className='relative p-2 hover:bg-slate-100 rounded-lg'>
-                                        <MessageSquare className="w-6 h-6 text-slate-600" /></div></NavLink>
+                                        <MessageSquare className="w-6 h-6 text-slate-600" />
+                                        {unreadMessages > 0 && (
+                                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                                            {unreadMessages}
+                                        </span>
+                                        )}</div></NavLink>
                                         <NavLink
                                         to="/settings"
                                         data-testid="desktop-settings"
@@ -146,7 +175,12 @@ const Header = () => {
                                         <>
                                             <NavLink to="/messages" data-testid="mobile-messages" className="px-4 py-2 border rounded-md text-gray-700 hover:border-purple-600 transition-colors">
                                                 <div className='relative p-2 hover:bg-slate-100 rounded-lg'>
-                                                    <MessageSquare className="w-6 h-6 text-slate-600" /></div></NavLink>
+                                                    <MessageSquare className="w-6 h-6 text-slate-600" />
+                                                    {unreadMessages > 0 && (
+                                                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                                                    {unreadMessages}
+                                                    </span>
+                                                    )}</div></NavLink>
                                                     <NavLink
                                                     to="/settings"
                                                     data-testid="mobile-settings"
