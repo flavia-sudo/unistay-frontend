@@ -2,7 +2,10 @@ import { Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
-//import Footer from "./components/Footer";
+import VerifyUser from "./pages/VerifyUser";
+import Register from "./pages/Register";
+import Profile from "./pages/Profile";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
@@ -12,6 +15,10 @@ function App() {
         <Routes>
           <Route path='/' element={<Landing />} />
           <Route path='/login' element={<Login />} />
+          <Route path='/verify' element={<VerifyUser/>} />
+          <Route path='/register' element={<Register/>} />
+          <Route path='/profile' element={<Profile/>} />
+          <Route path="*" element={<NotFound/>} />
         </Routes>
       </main>
     </div>

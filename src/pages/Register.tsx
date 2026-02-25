@@ -5,336 +5,311 @@ import axios from "axios";
 import { useDispatch } from "react-redux";
 import { login } from "../features/login/authSlice";
 
-const Register = () => {
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [phoneNumber, setPhoneNumber] = useState("");
-    const [address, setAddress] = useState("");
-    const [errorMessage, setErrorMessage] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [code, setCode] = useState("");
-    const [showVerificationForm, setShowVerificationForm] = useState(false);
+const Register: React.FC = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-    // Password toggle
-    const togglePassword = () => setShowPassword((prev) => !prev);
-    const toggleConfirmPassword = () => setShowConfirmPassword((prev) => !prev);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [code, setCode] = useState("");
+  const [showVerificationForm, setShowVerificationForm] = useState(false);
 
-    //submission
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setErrorMessage("");
+  const togglePassword = () => setShowPassword((prev) => !prev);
+  const toggleConfirmPassword = () =>
+    setShowConfirmPassword((prev) => !prev);
 
-        if (!email.match(/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/)) {
-            setErrorMessage("Invalid email address!");
-            return;
-        }
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setErrorMessage("");
 
-        if (!phoneNumber.match(/^07\d{8}$/)) {
-            setErrorMessage("Invalid phone number!");
-            return;
-        }
+    if (!email.match(/^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/)) {
+      setErrorMessage("Invalid email address!");
+      return;
+    }
 
-        if (password.length < 6) {
-            setErrorMessage("Password should be at least 6 characters long");
-            return;
-        }
+    if (!phoneNumber.match(/^07\d{8}$/)) {
+      setErrorMessage("Invalid phone number!");
+      return;
+    }
 
-        if (password !== confirmPassword) {
-            setErrorMessage("Passwords do not match!");
-            return;
-        }
+    if (password.length < 6) {
+      setErrorMessage("Password should be at least 6 characters long");
+      return;
+    }
 
-        const userDetails = {
-            firstName,
-            lastName,
-            email,
-            phoneNumber,
-            address,
-            password,
-            role: "user",
-        };
+    if (password !== confirmPassword) {
+      setErrorMessage("Passwords do not match!");
+      return;
+    }
 
-        try {
-            const response = await axios.post(
-                "https://hostel-backend-fyy3.onrender.com/auth/register",
-                userDetails,
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
-
-            if (response.status !== 201) {
-                setErrorMessage(response.data.message || "Registration failed");
-                return;
-            }
-
-            console.log("Registration successful:", response.data);
-            const user = response.data.user;
-            const token = response.data.token;
-
-            dispatch(login({ ...user, token }));
-
-            // Reset form
-            setFirstName("");
-            setLastName("");
-            setEmail("");
-            setPassword("");
-            setConfirmPassword("");
-            setPhoneNumber("");
-            setAddress("");
-
-            setShowVerificationForm(true);
-        } catch (error: unknown) {
-            if (axios.isAxiosError(error)) {
-                console.error("Registration error:", error.response?.data);
-                alert(error.response?.data?.error || "Registration failed");
-            } else {
-                console.error("Unexpected error:", error);
-                alert("An unexpected error occurred");
-            }
-        }
+    const userDetails = {
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      password,
+      role: "user",
     };
 
-    const handleVerify = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setErrorMessage("");
-        const user = localStorage.getItem("User");
-        const email = user ? JSON.parse(user).email : "";
-        console.log(email)
+    try {
+      const response = await axios.post(
+        "https://hostel-backend-fyy3.onrender.com/auth/register",
+        userDetails,
+        { headers: { "Content-Type": "application/json" } }
+      );
 
-        try {
-            const response = await axios.post("https://hostel-backend-fyy3.onrender.com/auth/verify", {
-                email,
-                code,
-            });
-                                console.log(response.data);
+      if (response.status !== 201) {
+        setErrorMessage(response.data.message || "Registration failed");
+        return;
+      }
 
-            if (response.status === 200) {
-                navigate("/");
-            } else {
-                setErrorMessage(response.data.message || "Verification failed");
-            }
-        } catch (error: unknown) {
-            if (axios.isAxiosError(error)) {
-                console.error("Verification error:", error.response?.data);
-                setErrorMessage(error.response?.data?.error || "Verification failed");
-            } else {
-                console.error("Unexpected error:", error);
-                setErrorMessage("An unexpected error occurred");
-            }
-        }
-    };
+      const user = response.data.user;
+      const token = response.data.token;
 
-    return (
-        <div className="flex items-center justify-center w-full min-h-screen px-4 py-12 pt-20 bg-gray-50 sm:px-6 lg:px-8">
-            <div className="w-full p-8 space-y-8 bg-white rounded-lg shadow-md max-w-150">
-                {!showVerificationForm ? (
-                    <>
-                        <div>
-                            <h2 className="mt-6 text-3xl font-extrabold text-center text-gray-900">Sign Up</h2>
-                        </div>
-                        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                            <div className="flex justify-center gap-6 align-center">
-                                <div className="w-full">
-                                    <label htmlFor="firstName" className="block font-medium text-gray-700 text-bg">
-                                        First Name
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="firstName"
-                                        value={firstName}
-                                        onChange={(e) => {
-                                            const value = e.target.value;
-                                            setFirstName(value.charAt(0).toUpperCase() + value.slice(1));
-                                        }}
-                                        required
-                                        className="w-full px-3 py-2 mt-1 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
-                                    />
-                                </div>
-                                <div className="w-full">
-                                    <label htmlFor="lastName" className="block font-medium text-gray-700 text-bg">
-                                        Last Name
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="lastName"
-                                        value={lastName}
-                                        onChange={(e) => {
-                                            const value = e.target.value;
-                                            setLastName(value.charAt(0).toUpperCase() + value.slice(1));
-                                        }}
-                                        required
-                                        className="w-full px-3 py-2 mt-1 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
-                                    />
-                                </div>
-                            </div>
+      dispatch(login({ ...user, token }));
+      localStorage.setItem("User", JSON.stringify({ ...user, token }));
 
-                            <div>
-                                <label htmlFor="phoneNumber" className="block font-medium text-gray-700 text-bg">
-                                    Phone Number
-                                </label>
-                                <input
-                                    type="tel"
-                                    id="phoneNumber"
-                                    value={phoneNumber}
-                                    onChange={(e) => setPhoneNumber(e.target.value)}
-                                    required
-                                    className="w-full px-3 py-2 mt-1 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
-                                />
-                            </div>
+      setShowVerificationForm(true);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        setErrorMessage(error.response?.data?.error || "Registration failed");
+      } else {
+        setErrorMessage("An unexpected error occurred");
+      }
+    }
+  };
 
-                            <div>
-                                <label htmlFor="email" className="block font-medium text-gray-700 text-bg">
-                                    Email
-                                </label>
-                                <input
-                                    type="email"
-                                    id="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                    className="w-full px-3 py-2 mt-1 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
-                                />
-                            </div>
-                            <div className="flex justify-center gap-6 align-center">
-                                <div className="w-full">
-                                    <label htmlFor="address" className="block font-medium text-gray-700 text-bg">
-                                        Address
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="address"
-                                        value={address}
-                                        onChange={(e) => setAddress(e.target.value)}
-                                        required
-                                        className="w-full px-3 py-2 mt-1 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
-                                    />
-                                </div>
-                            </div>
+  const handleVerify = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setErrorMessage("");
 
-                            <div>
-                                <label htmlFor="password" className="block font-medium text-gray-700 text-bg">
-                                    Password
-                                </label>
-                                <div className="relative mt-1">
-                                    <input
-                                        type={showPassword ? "text" : "password"}
-                                        id="password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                        className="w-full px-3 py-2 pr-10 mt-1 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={togglePassword}
-                                        className="absolute inset-y-0 right-0 flex items-center pr-3"
-                                    >
-                                        {showPassword ? (
-                                            <EyeOff className="w-4 h-4 text-black cursor-pointer sm:h-5 sm:w-5" />
-                                        ) : (
-                                            <Eye className="w-4 h-4 text-black cursor-pointer sm:h-5 sm:w-5" />
-                                        )}
-                                    </button>
-                                </div>
-                            </div>
+    let email = "";
+    try {
+      const user = localStorage.getItem("User");
+      if (user) email = JSON.parse(user).email;
+    } catch {
+      setErrorMessage("Invalid user session. Please register again.");
+      return;
+    }
 
-                            <div>
-                                <label htmlFor="confirmPassword" className="block font-medium text-gray-700 text-bg">
-                                    Confirm Password
-                                </label>
-                                <div className="relative mt-1">
-                                    <input
-                                        type={showConfirmPassword ? "text" : "password"}
-                                        id="confirmPassword"
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                        required
-                                        className="w-full px-3 py-2 pr-10 mt-1 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={toggleConfirmPassword}
-                                        className="absolute inset-y-0 right-0 flex items-center pr-3"
-                                    >
-                                        {showConfirmPassword ? (
-                                            <EyeOff className="w-4 h-4 text-black cursor-pointer sm:h-5 sm:w-5" />
-                                        ) : (
-                                            <Eye className="w-4 h-4 text-black cursor-pointer sm:h-5 sm:w-5" />
-                                        )}
-                                    </button>
-                                </div>
-                            </div>
+    try {
+      const response = await axios.post(
+        "https://hostel-backend-fyy3.onrender.com/auth/verify",
+        { email, code }
+      );
 
-                            {errorMessage && <div className="text-sm text-center text-red-600">{errorMessage}</div>}
+      if (response.status === 200) {
+        navigate("/");
+      } else {
+        setErrorMessage(response.data.message || "Verification failed");
+      }
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        setErrorMessage(error.response?.data?.error || "Verification failed");
+      } else {
+        setErrorMessage("An unexpected error occurred");
+      }
+    }
+  };
 
-                            <div className="text-center">
-                                <p className="text-sm text-gray-600">
-                                    If you already have an account,{" "}
-                                    <button
-                                        type="button"
-                                        onClick={() => navigate("/login")}
-                                        className="text-purple-600 underline cursor-pointer hover:text-purple-700"
-                                    >
-                                        Login
-                                    </button>
-                                </p>
-                            </div>
-                            <div>
-                                <button
-                                    type="submit"
-                                    className="w-full px-4 py-2 font-semibold text-white transition-colors duration-300 bg-purple-800 rounded-md shadow-lg cursor-pointer hover:bg-purple-700"
-                                >
-                                    Sign Up
-                                </button>
-                            </div>
-                        </form>
-                    </>
-                ) : (
-                    <>
-                        <div className="flex flex-col items-center justify-center min-h-screen">
-                            <h2 className="text-3xl font-extrabold text-center text-gray-900">
-                                Enter Verification Code
-                            </h2>
-                            <form className="mt-8 space-y-6" onSubmit={handleVerify}>
-                                <div>
-                                    <label htmlFor="verificationCode" className="block font-medium text-gray-700">
-                                        Verification Code
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="verificationCode"
-                                        value={code}
-                                        onChange={(e) => setCode(e.target.value)}
-                                        placeholder="Enter your verification code..."
-                                        required
-                                        className="w-full px-3 py-2 mt-1 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
-                                    />
-                                </div>
-                                {errorMessage && <div className="text-sm text-center text-red-600">{errorMessage}</div>}
-                                <div>
-                                    <button
-                                        type="submit"
-                                        className="w-full px-4 py-2 font-semibold text-white transition-colors duration-300 bg-purple-800 rounded-md shadow-lg hover:bg-purple-700"
-                                    >
-                                        Verify
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </>
-                )}
+  const inputStyle =
+    "w-full px-4 py-3 mt-1 text-gray-800 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200";
+
+  return (
+    <div className="flex items-center justify-center min-h-screen px-4 py-16 bg-gradient-to-br from-purple-50 to-gray-100">
+      <div className="w-full max-w-xl p-10 space-y-8 bg-white shadow-2xl rounded-2xl">
+        {!showVerificationForm ? (
+          <>
+            <div>
+              <h2 className="text-4xl font-bold text-center text-gray-800">
+                Sign Up
+              </h2>
+              <p className="mt-2 text-sm text-center text-gray-500">
+                Create your account to get started
+              </p>
             </div>
-        </div>
-    );
+
+            <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    value={firstName}
+                    onChange={(e) =>
+                      setFirstName(
+                        e.target.value.charAt(0).toUpperCase() +
+                          e.target.value.slice(1)
+                      )
+                    }
+                    required
+                    className={inputStyle}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    value={lastName}
+                    onChange={(e) =>
+                      setLastName(
+                        e.target.value.charAt(0).toUpperCase() +
+                          e.target.value.slice(1)
+                      )
+                    }
+                    required
+                    className={inputStyle}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  required
+                  className={inputStyle}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className={inputStyle}
+                />
+              </div>
+
+              {/* Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className={`${inputStyle} pr-12`}
+                  />
+                  <button
+                    type="button"
+                    onClick={togglePassword}
+                    className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Confirm Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    className={`${inputStyle} pr-12`}
+                  />
+                  <button
+                    type="button"
+                    onClick={toggleConfirmPassword}
+                    className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff size={18} />
+                    ) : (
+                      <Eye size={18} />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {errorMessage && (
+                <div className="text-sm text-center text-red-600">
+                  {errorMessage}
+                </div>
+              )}
+
+              <div className="text-center text-sm text-gray-600">
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  onClick={() => navigate("/login")}
+                  className="font-medium text-purple-700 transition hover:text-purple-900"
+                >
+                  Login
+                </button>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 font-semibold text-white transition-all duration-300 bg-gradient-to-r from-purple-700 to-purple-900 rounded-lg shadow-lg hover:scale-[1.02] hover:shadow-xl"
+              >
+                Sign Up
+              </button>
+            </form>
+          </>
+        ) : (
+          <>
+            <h2 className="text-3xl font-bold text-center text-gray-800">
+              Enter Verification Code
+            </h2>
+
+            <form className="mt-6 space-y-5" onSubmit={handleVerify}>
+              <input
+                type="text"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                placeholder="Enter your verification code..."
+                required
+                className={inputStyle}
+              />
+
+              {errorMessage && (
+                <div className="text-sm text-center text-red-600">
+                  {errorMessage}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="w-full py-3 font-semibold text-white transition-all duration-300 bg-gradient-to-r from-purple-700 to-purple-900 rounded-lg shadow-lg hover:scale-[1.02] hover:shadow-xl"
+              >
+                Verify Account
+              </button>
+            </form>
+          </>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default Register;

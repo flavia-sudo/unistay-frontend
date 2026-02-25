@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { FaBuilding } from "react-icons/fa";
-import { IoSettingsOutline } from "react-icons/io5";
+import { IoSettings } from "react-icons/io5";
 import { NavLink } from 'react-router-dom';
 import { logout } from '../features/login/authSlice';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Menu, X, MessageSquare, LogOut, Search } from 'lucide-react';
+import { Menu, X, MessageSquare, LogOut } from 'lucide-react';
 
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -55,24 +55,25 @@ const Header = () => {
     };
 
     const getLinkClass = ({ isActive }: { isActive: boolean }) =>
-        `${
-            isActive ? "text-purple-600 underline" : "text-gray-700 hover: text-purple-600"
-        } text-base lg:text-lg font-semibold transition-colors`;
+        `text-base lg:text-lg font-semibold transition-colors duration-100 ${
+            isActive ? "text-indigo-600 underline underline-offset-4" : "text-gray-600 hover: text-purple-600"
+        }`;
 
         return (
             <header className="w-full bg-white shadow-sm sticky top-0 z-50 border-b border-slate-200" data-testid="header">
                 <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
                     <div className='flex items-center justify-between h-16'>
                         <NavLink to="/" className="flex items-center gap-2" data-testid="logo">
-                        <div className='w-10 h-10 bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify center'>
-                            <FaBuilding className="w-8 h-8 text-white" />
+                        <div className='bg-purple-600 p-2 rounded-lg'>
+                            <FaBuilding className="w-6 h-6 text-white" />
                             </div>
                             <span className='text-xl font-bold bg-linear-to-br from-indigo-600 to-purple-600 bg-clip-text text-transparent'>UniStay</span>
                             </NavLink>
+                            <div className='text-black text-xl'>
                             <nav className="hidden md:flex space-x-8">
                                 <NavLink to="/" className={getLinkClass} data-testid="desktop-home">Home</NavLink>
-                                <NavLink to="/search" className={getLinkClass} data-testid="desktop-search">
-                                <Search className="w-6 h-6" />Search</NavLink>
+                                <NavLink to="/hostels" className={getLinkClass} data-testid="desktop-search">
+                                Browse Hostels</NavLink>
                                 {isLoggedIn && (
                                     <NavLink to="/dashboard" className={getLinkClass} data-testid="desktop-dashboard">Dashboard</NavLink>
                                 )}
@@ -83,14 +84,15 @@ const Header = () => {
                                     <NavLink to="/admin" className={getLinkClass} data-testid="desktop-admin">Admin</NavLink>
                                 )}
                             </nav>
+                            </div>
 
                             {/* Desktop CTA Buttons */}
-                            <div className="hidden md:flex items-center space-x-4">
+                            <div className="hidden md:flex items-center space-x-2">
                                 {isLoggedIn ? (
                                 <>
-                                    <NavLink to="/messages" data-testid="desktop-messages" className="px-4 py-2 border rounded-md text-gray-700 hover:border-purple-600 transition-colors">
+                                    <NavLink to="/messages" data-testid="desktop-messages" className="px-2 py-2 text-gray-900 transition-colors">
                                     <div className='relative p-2 hover:bg-slate-100 rounded-lg'>
-                                        <MessageSquare className="w-6 h-6 text-slate-600" />
+                                        <MessageSquare className="w-6 h-6 text-slate-900" />
                                         {unreadMessages > 0 && (
                                         <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
                                             {unreadMessages}
@@ -99,20 +101,20 @@ const Header = () => {
                                         <NavLink
                                         to="/settings"
                                         data-testid="desktop-settings"
-                                        className="px-4 py-2 border rounded-md text-gray-700 hover:border-purple-600 transition-colors"
+                                        className="px-2 py-2 text-gray-900 transition-colors"
                                     >
                                         <div className='relative p-2 hover:bg-slate-100 rounded-lg'>
-                                        <IoSettingsOutline className="w-6 h-6 text-slate-600" /></div>
+                                        <IoSettings className="w-6 h-6 text-slate-900" /></div>
                                     </NavLink>
                                     <NavLink
                                         to="/profile"
                                         data-testid="desktop-profile"
-                                        className="px-4 py-2 border rounded-md text-gray-700 hover:border-purple-600 transition-colors"
+                                        className="px-4 py-2 border rounded-md text-gray-900 hover:border-purple-600 transition-colors hover:bg-purple-50 hover:text-purple-700"
                                     >
                                         Profile
                                     </NavLink>
-                                    <button onClick={handleLogout} data-testid="desktop-logout" className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors">
-                                    <LogOut className="w-6 h-6" />
+                                    <button onClick={handleLogout} data-testid="desktop-logout" className="flex-1 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors flex items-center justify-center gap-2">
+                                    <LogOut className="w-3 h-3" />
                                         Logout
                                     </button>
                                 </>
@@ -138,7 +140,7 @@ const Header = () => {
 
                         {/* Mobile Menu */}
                         <div className="md:hidden">
-                            <button onClick={() => setIsMenuOpen(!isMenuOpen)} data-testid="mobile-menu-button" className='text-gray-700 hover:text-purple-600 transition-colors duration-200'>
+                            <button onClick={() => setIsMenuOpen(!isMenuOpen)} data-testid="mobile-menu-button" className='text-gray-900 hover:text-purple-600 transition-colors duration-200'>
                                 {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                             </button>
                         </div>
@@ -147,59 +149,64 @@ const Header = () => {
                     {/* Mobile Navigation */}
                     {isMenuOpen && (
                         <div className='md:hidden'>
-                            <div className='px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t'>
+                            <div className="bg-white border-t shadow-sm">
+                            <div className='px-4 py-3 space-y-1'>
                                 <NavLink to='/' data-testid="mobile-home" className={`${getLinkClass} text-black`} onClick={() => setIsMenuOpen(false)}>
                                     Home
                                 </NavLink>
-                                <NavLink to='/search' data-testid="mobile-search" className={`${getLinkClass} text-black`} onClick={() => setIsMenuOpen(false)}>
-                                <Search className="w-6 h-6" />
-                                    Search
+                                <NavLink to='/hostels' data-testid="mobile-search" className={`${getLinkClass} block text-black`} onClick={() => setIsMenuOpen(false)}>
+                                    Browse Hostels
                                 </NavLink>
                                 {isLoggedIn && (
-                                    <NavLink to='/dashboard' data-testid="mobile-dashboard" className={`${getLinkClass} text-black`} onClick={() => setIsMenuOpen(false)}>
+                                    <NavLink to='/dashboard' data-testid="mobile-dashboard" className={`${getLinkClass} block text-black`} onClick={() => setIsMenuOpen(false)}>
                                         Dashboard
                                     </NavLink>
                                 )}
                                 {isLandlord && (
-                                    <NavLink to='/landlord' data-testid="mobile-landlord" className={`${getLinkClass} text-black`} onClick={() => setIsMenuOpen(false)}>
+                                    <NavLink to='/landlord' data-testid="mobile-landlord" className={`${getLinkClass} block text-black`} onClick={() => setIsMenuOpen(false)}>
                                         Landlord
                                     </NavLink>
                                 )}
                                 {isAdmin && (
-                                    <NavLink to='/admin' data-testid="mobile-admin" className={`${getLinkClass} text-black`} onClick={() => setIsMenuOpen(false)}>
+                                    <NavLink to='/admin' data-testid="mobile-admin" className={`${getLinkClass} block text-black`} onClick={() => setIsMenuOpen(false)}>
                                         Admin
                                     </NavLink>
                                 )}
-                                <div className='px-3 py-2 space-y-2'>
+                                <div className='border-t border-gray-200'>
+                                <div className='px-4 py-3 space-y-3'>
                                     {isLoggedIn ? (
                                         <>
-                                            <NavLink to="/messages" data-testid="mobile-messages" className="px-4 py-2 border rounded-md text-gray-700 hover:border-purple-600 transition-colors">
-                                                <div className='relative p-2 hover:bg-slate-100 rounded-lg'>
-                                                    <MessageSquare className="w-6 h-6 text-slate-600" />
+                                        <div className='flex justify-center gap-3'>
+                                            <NavLink to="/messages" data-testid="mobile-messages" className="mobile-icon-button">
+                                                <div className='relative p-2 hover:bg-slate-200 rounded-lg'>
+                                                    <MessageSquare className="w-8 h-8 text-slate-900" />
                                                     {unreadMessages > 0 && (
-                                                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                                                    <span className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
                                                     {unreadMessages}
                                                     </span>
                                                     )}</div></NavLink>
                                                     <NavLink
                                                     to="/settings"
                                                     data-testid="mobile-settings"
-                                                    className="px-4 py-2 border rounded-md text-gray-700 hover:border-purple-600 transition-colors"
+                                                    className="mobile-icon-button"
                                                 >
-                                                    <div className='relative p-2 hover:bg-slate-100 rounded-lg'>
-                                                    <IoSettingsOutline className="w-6 h-6 text-slate-600" /></div>
+                                                    <div className='relative p-2 hover:bg-slate-200 rounded-lg'>
+                                                    <IoSettings className="w-8 h-8 text-slate-900" /></div>
                                                 </NavLink>
+                                                <div className='flex gap-2'>
                                                 <NavLink
                                                     to="/profile"
                                                     data-testid="mobile-profile"
-                                                    className="px-4 py-2 border rounded-md text-gray-700 hover:border-purple-600 transition-colors"
+                                                    className="flex-1 px-4 py-2 border rounded-lg text-gray-900 hover:border-purple-600 transition-colors font-medium hover:bg-purple-50 hover:text-purple-700"
                                                 >
                                                     Profile
                                                 </NavLink>
-                                                <button onClick={handleLogout} data-testid="mobile-logout" className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors">
-                                                <LogOut className="w-6 h-6" />
+                                                <button onClick={handleLogout} data-testid="mobile-logout" className="flex-1 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors flex items-center justify-center gap-2">
+                                                <LogOut className="w-3 h-3" />
                                                     Logout
                                                 </button>
+                                        </div>
+                                        </div>
                                         </>
                                     ) : (
                                         <>
@@ -220,6 +227,8 @@ const Header = () => {
                                         </>
                                     )}
                                 </div>
+                                </div>
+                            </div>
                             </div>
                         </div>
                     )}
