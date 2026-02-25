@@ -6,6 +6,7 @@ import VerifyUser from "./pages/VerifyUser";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import Message from "./pages/Message";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path='/verify' element={<VerifyUser/>} />
           <Route path='/register' element={<Register/>} />
           <Route path='/profile' element={<Profile/>} />
+          <Route path='/messages' element={<Message />} />
           <Route path="*" element={<NotFound/>} />
         </Routes>
       </main>

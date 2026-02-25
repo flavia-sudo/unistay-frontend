@@ -42,7 +42,7 @@ const Services = () => {
       name: "MamboLeo Hostels",
       address: "Slaughter",
       type: "Bedsitter",
-      price: 14000,
+      price: 20000,
       rating: 4.4,
       roomsAvailable: 3,
       image:
@@ -61,8 +61,8 @@ const Services = () => {
     {
       name: "Executive Hostels",
       address: "Ndagani",
-      type: "Bedsitters",
-      price: 14000,
+      type: "Bedsitter",
+      price: 20000,
       rating: 4.9,
       roomsAvailable: 3,
       image:

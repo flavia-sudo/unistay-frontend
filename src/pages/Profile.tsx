@@ -13,7 +13,6 @@ const Profile = () => {
         lastName: user.lastname || "",
         email: user.email || "",
         phoneNumber: user.contactPhone || "",
-        address: user.address || "",
     });
 
     const navigate = useNavigate();
@@ -224,14 +223,6 @@ const Profile = () => {
                                 value={formData.phoneNumber}
                                 onChange={handleChange}
                                 className="p-2 text-gray-700 border rounded"
-                            />
-                            <input
-                                type="text"
-                                name="address"
-                                placeholder="Address"
-                                value={formData.address}
-                                onChange={handleChange}
-                                className="col-span-2 p-2 text-gray-700 border rounded"
                             />
                             <div className="flex justify-end col-span-2 gap-4 mt-4">
                                 <button

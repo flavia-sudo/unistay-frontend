@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { FaBuilding } from "react-icons/fa";
-import { IoSettings } from "react-icons/io5";
 import { NavLink } from 'react-router-dom';
 import { logout } from '../features/login/authSlice';
 import { useDispatch } from 'react-redux';
@@ -98,14 +97,6 @@ const Header = () => {
                                             {unreadMessages}
                                         </span>
                                         )}</div></NavLink>
-                                        <NavLink
-                                        to="/settings"
-                                        data-testid="desktop-settings"
-                                        className="px-2 py-2 text-gray-900 transition-colors"
-                                    >
-                                        <div className='relative p-2 hover:bg-slate-100 rounded-lg'>
-                                        <IoSettings className="w-6 h-6 text-slate-900" /></div>
-                                    </NavLink>
                                     <NavLink
                                         to="/profile"
                                         data-testid="desktop-profile"
@@ -185,14 +176,6 @@ const Header = () => {
                                                     {unreadMessages}
                                                     </span>
                                                     )}</div></NavLink>
-                                                    <NavLink
-                                                    to="/settings"
-                                                    data-testid="mobile-settings"
-                                                    className="mobile-icon-button"
-                                                >
-                                                    <div className='relative p-2 hover:bg-slate-200 rounded-lg'>
-                                                    <IoSettings className="w-8 h-8 text-slate-900" /></div>
-                                                </NavLink>
                                                 <div className='flex gap-2'>
                                                 <NavLink
                                                     to="/profile"
