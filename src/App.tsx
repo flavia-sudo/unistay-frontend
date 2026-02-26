@@ -7,6 +7,7 @@ import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import Message from "./pages/Message";
+import AdminDashboard from "./Dashboard/AdminDashboard/AdminDashboard";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path='/register' element={<Register/>} />
           <Route path='/profile' element={<Profile/>} />
           <Route path='/messages' element={<Message />} />
+          <Route path='/admin' element={<AdminDashboard />} />
           <Route path="*" element={<NotFound/>} />
         </Routes>
       </main>

@@ -13,7 +13,7 @@ const Header = () => {
     const token = localStorage.getItem('Token');
     const user = JSON.parse(localStorage.getItem('User') || '{}');
     const isAdmin = user.role === 'admin';
-    const isLandlord = user.role === 'doctor';
+    const isLandlord = user.role === 'landlord';
     const dispatch = useDispatch();
     const navigate = useNavigate();
 

@@ -6,6 +6,10 @@ export type TBooking = {
     hostelId: number;
     roomId: number;
     userId: number;
+    firstName: string;
+    lastName: string;
+    hostelName: string;
+    roomNumber: string;
     checkInDate: Date;
     duration: string;
     totalAmount: number;
@@ -36,8 +40,9 @@ endpoints: (builder) => ({
         }),
         invalidatesTags: ["Bookings"],
     }),
-    getBookings: builder.query<{ data: TBooking[] }, void>({
+    getBookings: builder.query< TBooking[], void>({
         query: () => "/booking_all",
+        transformResponse: (response: { data: TBooking[] }) => response.data,
         providesTags: ["Bookings"],
     }),
     getBookingById: builder.query<TBooking, number>({

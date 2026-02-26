@@ -55,7 +55,6 @@ const Register: React.FC = () => {
       email,
       phoneNumber,
       password,
-      role: "user",
     };
 
     try {
@@ -66,21 +65,30 @@ const Register: React.FC = () => {
       );
 
       if (response.status !== 201) {
-        setErrorMessage(response.data.message || "Registration failed");
-        return;
+        navigate("/verify");
+      } else {
+        setErrorMessage(response.data.message || "Registration failed.");
       }
-
+      console.log("Registration successful:", response.data);
       const user = response.data.user;
       const token = response.data.token;
 
       dispatch(login({ ...user, token }));
-      localStorage.setItem("User", JSON.stringify({ ...user, token }));
+
+      setFirstName("");
+      setLastName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      setPhoneNumber("");
 
       setShowVerificationForm(true);
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        setErrorMessage(error.response?.data?.error || "Registration failed");
+        console.error("Registration error:", error.response?.data);
+        setErrorMessage(error.response?.data?.message || "Registration failed. Please try again.");
       } else {
+        console.error("Unexpected error:", error);
         setErrorMessage("An unexpected error occurred");
       }
     }
@@ -89,21 +97,16 @@ const Register: React.FC = () => {
   const handleVerify = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrorMessage("");
-
-    let email = "";
-    try {
-      const user = localStorage.getItem("User");
-      if (user) email = JSON.parse(user).email;
-    } catch {
-      setErrorMessage("Invalid user session. Please register again.");
-      return;
-    }
+    const user = localStorage.getItem("User");
+    const email = user ? JSON.parse(user).email : "";
+    console.log(email);
 
     try {
       const response = await axios.post(
         "https://hostel-backend-fyy3.onrender.com/auth/verify",
         { email, code }
       );
+      console.log(response.data);
 
       if (response.status === 200) {
         navigate("/");
@@ -112,8 +115,10 @@ const Register: React.FC = () => {
       }
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
+        console.error("Verification error:", error.response?.data);
         setErrorMessage(error.response?.data?.error || "Verification failed");
       } else {
+        console.error("Unexpected error:", error);
         setErrorMessage("An unexpected error occurred");
       }
     }
@@ -180,7 +185,7 @@ const Register: React.FC = () => {
                   Phone Number
                 </label>
                 <input
-                  type="tel"
+                  type="text"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   required
