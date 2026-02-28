@@ -118,7 +118,8 @@ const AllBookings = () => {
             <table className="w-full text-left">
               <thead>
                 <tr className="text-slate-500 text-sm border-b">
-                  <th className="pb-3">Student</th>
+                  <th className="pb-3">First Name</th>
+                  <th className="pb-3">Last Name</th>
                   <th className="pb-3">Hostel</th>
                   <th className="pb-3">Room</th>
                   <th className="pb-3">Amount</th>
