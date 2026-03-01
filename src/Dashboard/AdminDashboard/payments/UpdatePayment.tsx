@@ -85,7 +85,23 @@ const UpdatePayment = ({ payment }: UpdatePaymentProps) => {
             ></div>
             <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-2xl p-6 w-full max-w-md z-50">
                 <h3 className="font-bold text-xl mb-4 text-gray-800">Update Payment</h3>
-                <form onSubmit={handleSubmit(onSubmit)}>
+                {payment && (
+                    <div className="bg-slate-50 rounded-lg p-4 mb-6 text-sm">
+            <p>
+              <span className="font-medium">Paid By:</span>{" "}
+              {payment.firstName} {payment.lastName}
+            </p>
+            <p>
+              <span className="font-medium">Hostel:</span>{" "}
+              {payment.hostelName}
+            </p>
+            <p>
+              <span className="font-medium">Room:</span>{" "}
+              {payment.roomNumber}
+            </p>
+          </div>
+                )}
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                     <div className="form-control w-full">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Booking ID
@@ -129,9 +145,9 @@ const UpdatePayment = ({ payment }: UpdatePaymentProps) => {
                         <button
                         type="submit"
                         disabled={isLoading}
-                        className="cursor-pointer px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
+                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
                         >
-                        {isLoading ? "Creating..." : "Create Payment"}
+                        {isLoading ? "Updating..." : "Update Payment"}
                         </button>
                     </div>
                     </form>

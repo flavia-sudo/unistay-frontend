@@ -179,7 +179,7 @@ const schema = yup
             <button
               type="submit"
               disabled={isLoading}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-md"
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md"
             >
               {isLoading ? "Updating..." : "Update Booking"}
             </button>
