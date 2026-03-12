@@ -54,14 +54,14 @@ const Header = () => {
     };
 
     const getLinkClass = ({ isActive }: { isActive: boolean }) =>
-        `text-base lg:text-lg font-semibold transition-colors duration-100 ${
-            isActive ? "text-indigo-600 underline underline-offset-4" : "text-gray-600 hover: text-purple-600"
+        `text-lg lg:text-xl font-semibold transition-colors duration-100 ${
+            isActive ? "text-indigo-600 underline underline-offset-4" : "text-purple-600 hover:text-purple-700"
         }`;
 
         return (
             <header className="w-full bg-white shadow-sm sticky top-0 z-50 border-b border-slate-200" data-testid="header">
                 <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className='flex items-center justify-between h-16'>
+                    <div className='flex items-center justify-between h-20'>
                         <NavLink to="/" className="flex items-center gap-2" data-testid="logo">
                         <div className='bg-purple-600 p-2 rounded-lg'>
                             <FaBuilding className="w-6 h-6 text-white" />

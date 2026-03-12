@@ -8,6 +8,8 @@ import {
   ArrowRight,
   CheckCircle,
   Clock,
+  Toolbox,
+  PenLine,
 } from "lucide-react";
 
 interface User {
@@ -38,12 +40,27 @@ interface Payment {
   amount: number;
 }
 
+interface Maintenance {
+  id: string;
+  hostel_name: string;
+  room_number: string;
+  status: string;
+}
+
+interface Review {
+  id: string;
+  hostel_name: string;
+  rating: number;
+}
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
     users: [] as User[],
     hostels: [] as Hostel[],
     bookings: [] as Booking[],
     payments: [] as Payment[],
+    maintenance: [] as Maintenance[],
+    reviews: [] as Review[],
   });
 
   const [loading, setLoading] = useState(true);
@@ -54,18 +71,30 @@ export default function AdminDashboard() {
 
   const loadData = async () => {
     try {
-      // 🔥 Replace with your real API calls
-      const users: User[] = [];
-      const hostels: Hostel[] = [];
-      const bookings: Booking[] = [];
-      const payments: Payment[] = [];
+      setLoading(true);
+      const [usersRes, hostelRes, bookingRes, paymentRes, maintenanceRes, reviewRes] =
+        await Promise.all([
+          fetch("/user_all", {credentials: "include"}),
+          fetch("/hostel_all", {credentials: "include"}),
+          fetch("/booking_all", {credentials: "include"}),
+          fetch("/payment_all", {credentials: "include"}),
+          fetch("/maintenance_all", {credentials: "include"}),
+          fetch("/review_all", {credentials: "include"})
 
-      setStats({ users, hostels, bookings, payments });
+        ]);
+      const users: User[] = await usersRes.json();
+      const hostels: Hostel[] = await hostelRes.json();
+      const bookings: Booking[] = await bookingRes.json();
+      const payments: Payment[] = await paymentRes.json();
+      const maintenance: Maintenance[] = await maintenanceRes.json();
+      const reviews: Review[] = await reviewRes.json();
+
+      setStats({ users, hostels, bookings, payments, maintenance, reviews });
     } catch (err) {
       console.error(err);
-    }
-
+    } finally {
     setLoading(false);
+    }
   };
 
   const students =
@@ -76,6 +105,9 @@ export default function AdminDashboard() {
 
   const pendingHostels =
     stats.hostels.filter((h) => h.status === "pending").length;
+
+  const pendingMaintenance =
+    stats.maintenance.filter((m) => m.status === "pending").length;
 
   const totalRevenue = stats.payments
     .filter((p) => p.status === "completed")
@@ -154,6 +186,12 @@ export default function AdminDashboard() {
             value={`$${totalRevenue.toLocaleString()}`}
             Icon={CreditCard}
             color="purple"
+          />
+          <StatCard
+            title="Maintenance"
+            value={pendingMaintenance}
+            Icon={Toolbox}
+            color="rose"
           />
         </div>
 
@@ -285,6 +323,103 @@ export default function AdminDashboard() {
                 </div>
               )}
             </div>
+          </div>
+          <div className="grid lg:grid-cols-2 gap-6 mt-6">
+
+            {/* Maintenance Requests */}
+            <div className="bg-white shadow-sm rounded-xl">
+              <div className="flex justify-between items-center p-5 border-b">
+                <h2 className="font-semibold text-slate-900 flex items-center gap-2">
+                  <Toolbox className="w-5 h-5 text-indigo-500" />
+                  Maintenance Requests
+                </h2>
+
+                <Link to="/admin/maintenance">
+                  <button className="text-sm text-indigo-600 hover:underline flex items-center gap-1">
+                    View All <ArrowRight className="w-4 h-4" />
+                  </button>
+                </Link>
+              </div>
+
+              <div className="p-5">
+                {stats.maintenance.length === 0 ? (
+                  <div className="text-center py-8 text-slate-500">
+                    <Toolbox className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+                    <p>No maintenance requests</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {stats.maintenance.slice(0, 5).map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex justify-between items-center bg-slate-50 p-3 rounded-lg"
+                      >
+                        <div>
+                          <p className="font-medium text-slate-900">
+                            {item.hostel_name}
+                          </p>
+                          <p className="text-sm text-slate-500">
+                            Room {item.room_number}
+                          </p>
+                        </div>
+
+                        <span className="text-xs px-2 py-1 rounded bg-indigo-100 text-indigo-700">
+                          {item.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Recent Reviews */}
+            <div className="bg-white shadow-sm rounded-xl">
+              <div className="flex justify-between items-center p-5 border-b">
+                <h2 className="font-semibold text-slate-900 flex items-center gap-2">
+                  <PenLine className="w-5 h-5 text-purple-500" />
+                  Recent Reviews
+                </h2>
+
+                <Link to="/admin/reviews">
+                  <button className="text-sm text-indigo-600 hover:underline flex items-center gap-1">
+                    View All <ArrowRight className="w-4 h-4" />
+                  </button>
+                </Link>
+              </div>
+
+              <div className="p-5">
+                {stats.reviews.length === 0 ? (
+                  <div className="text-center py-8 text-slate-500">
+                    <PenLine className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+                    <p>No reviews yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {stats.reviews.slice(0, 5).map((review) => (
+                      <div
+                        key={review.id}
+                        className="flex justify-between items-center bg-slate-50 p-3 rounded-lg"
+                      >
+                        <div>
+                          <p className="font-medium text-slate-900">
+                            {review.hostel_name}
+                          </p>
+                          <p className="text-sm text-slate-500">
+                            Rating
+                          </p>
+                        </div>
+
+                        <span className="text-sm font-semibold text-yellow-500">
+                          {review.rating}/5
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
           </div>
         </div>
       </div>

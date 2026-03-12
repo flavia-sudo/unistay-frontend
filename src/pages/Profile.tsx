@@ -19,7 +19,7 @@ const Profile = () => {
 
     const fullName = `${user.firstname || ""} ${user.lastname || ""}`;
     const initials = `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase();
-    const accountType = user.role ? "Admin" : "User";
+    const accountType = user.role ? "Admin" : user.role === "Student" ? "Student" : "Landlord";
     const verified = user.verified ? "Yes" : "No";
 
     useEffect(() => {

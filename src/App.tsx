@@ -8,6 +8,13 @@ import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import Message from "./pages/Message";
 import AdminDashboard from "./Dashboard/AdminDashboard/AdminDashboard";
+import Users from "./Dashboard/AdminDashboard/users/Users";
+import AllHostels from "./Dashboard/AdminDashboard/hostels/Hostel";
+import AllBookings from "./Dashboard/AdminDashboard/booking/Booking";
+import Payment from "./Dashboard/AdminDashboard/payments/Payment";
+import Maintenance from "./Dashboard/AdminDashboard/maintenance/Maintenance";
+import Review from "./Dashboard/AdminDashboard/reviews/Review";
+import AdminLayout from "./Dashboard/AdminDashboard/AdminLayout";
 
 function App() {
   return (
@@ -21,7 +28,15 @@ function App() {
           <Route path='/register' element={<Register/>} />
           <Route path='/profile' element={<Profile/>} />
           <Route path='/messages' element={<Message />} />
-          <Route path='/admin' element={<AdminDashboard />} />
+          <Route path='/admin' element={<AdminLayout />} >
+            <Route element={<AdminDashboard />} />
+            <Route path='users' element={<Users />} />
+            <Route path='hostels' element={< AllHostels />} />
+            <Route path='bookings' element={<AllBookings />} />
+            <Route path='payments' element={<Payment />} />
+            <Route path='maintenance' element={<Maintenance />} />
+            <Route path='reviews' element={<Review />} />
+          </Route>
           <Route path="*" element={<NotFound/>} />
         </Routes>
       </main>
