@@ -3,39 +3,65 @@ import { userDrawerData } from "./drawerData";
 import { IoCloseSharp } from "react-icons/io5";
 
 const UserDrawer = ({ onClose }: { onClose?: () => void }) => {
-    return (
-        <div className="p-4">
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-center text-white border-b-2 border-gray-700">
-                    Dashboard Menu
-                </h2>
-                {onClose && (
-                    <button
-                        onClick={onClose}
-                        className="md:hidden text-white hover:text-red-500"
-                        title="Close menu"
-                    >
-                        <IoCloseSharp size={24} />
-                    </button>
-                )}
-            </div>
-            <ul className="flex flex-col gap-2">
-                {userDrawerData.map((item) => (
-                    <li key={item.id}>
-                        <NavLink
-                            to={item.link}
-                            className="flex text-xl space-x-3 border-b-2 border-transparent hover:border-blue-400 text-gray-100 hover:bg-gray-700  m-2"
-                        >
-                            <item.icon />
-                            <span className="text-xl text-gray-100">
-                                {item.name}
-                            </span>
-                        </NavLink>
-                    </li>
-                ))}
-            </ul>
-        </div>
-    );
+  return (
+    <div className="h-full w-72 shrink-0 bg-gray-900 text-white flex flex-col shadow-xl p-5">
+
+      {/* Header */}
+      <div className="flex justify-between items-center mb-4">
+
+        <h2 className="text-lg font-semibold tracking-wide text-white">
+          Dashboard Menu
+        </h2>
+
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="md:hidden text-white hover:text-red-500"
+            title="Close menu"
+          >
+            <IoCloseSharp size={24} />
+          </button>
+        )}
+
+      </div>
+
+      {/* Menu Items */}
+      <ul className="flex flex-col gap-3 mt-4">
+
+        {userDrawerData.map((item) => (
+          <li key={item.id}>
+
+            <NavLink
+              to={item.link}
+              className={({ isActive }) =>
+                `flex items-center gap-4 px-5 py-3 rounded-xl transition-all duration-200
+                ${
+                  isActive
+                    ? "bg-blue-500 text-white shadow"
+                    : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                }`
+              }
+            >
+
+              {/* Icon */}
+              <div className="p-3 bg-gray-800 rounded-md">
+                <item.icon size={22} />
+              </div>
+
+              {/* Name */}
+              <span className="text-base font-semibold">
+                {item.name}
+              </span>
+
+            </NavLink>
+
+          </li>
+        ))}
+
+      </ul>
+
+    </div>
+  );
 };
 
 export default UserDrawer;

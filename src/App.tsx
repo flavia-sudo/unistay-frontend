@@ -15,6 +15,8 @@ import Payment from "./Dashboard/AdminDashboard/payments/Payment";
 import Maintenance from "./Dashboard/AdminDashboard/maintenance/Maintenance";
 import Review from "./Dashboard/AdminDashboard/reviews/Review";
 import AdminLayout from "./Dashboard/AdminDashboard/AdminLayout";
+import UserLayout from "./Dashboard/UserDashboard/UserLayout";
+import UserDashboard from "./Dashboard/UserDashboard/UserDashboard";
 
 function App() {
   return (
@@ -29,13 +31,17 @@ function App() {
           <Route path='/profile' element={<Profile/>} />
           <Route path='/messages' element={<Message />} />
           <Route path='/admin' element={<AdminLayout />} >
-            <Route element={<AdminDashboard />} />
+          <Route index element={<AdminDashboard />} />
+            <Route path='dashboard' element={<AdminDashboard />} />
             <Route path='users' element={<Users />} />
             <Route path='hostels' element={< AllHostels />} />
             <Route path='bookings' element={<AllBookings />} />
             <Route path='payments' element={<Payment />} />
             <Route path='maintenance' element={<Maintenance />} />
             <Route path='reviews' element={<Review />} />
+          </Route>
+          <Route path='/dashboard' element={<UserLayout />}>
+          <Route index element={<UserDashboard />} />
           </Route>
           <Route path="*" element={<NotFound/>} />
         </Routes>
