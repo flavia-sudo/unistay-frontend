@@ -2,7 +2,7 @@ import { Star, MapPin, Wifi, Car, Utensils } from "lucide-react";
 import greenValleyImg from "../assets/images/victor-birai-GmXr5dNL3YI-unsplash.jpg";
 import mamboLeoImg from "../assets/images/Screenshot 2026-02-25 171520.png";
 import riverSideImg from "../assets/images/michael-ali-_4FYGcptcSY-unsplash.jpg";
-import mordernImg from "../assets/images/Screenshot 2026-02-25 175004.png";
+import modernImg from "../assets/images/Screenshot 2026-02-25 175004.png";
 import executiveImg from "../assets/images/Screenshot 2026-02-25 171529.png";
 import campusImg from "../assets/images/Screenshot 2026-02-25 175154.png";
 
@@ -49,14 +49,14 @@ const Services = () => {
         mamboLeoImg,
     },
     {
-      name: "Mordern Hostels",
+      name: "Modern Hostels",
       address: "Mungoni",
       type: "Bedsitter",
       price: 26000,
       rating: 4.9,
       roomsAvailable: 10,
       image:
-        mordernImg,
+        modernImg,
     },
     {
       name: "Executive Hostels",

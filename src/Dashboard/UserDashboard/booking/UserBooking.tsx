@@ -42,7 +42,7 @@ const UserBooking = () => {
         <div className="w-full min-h-full bg-slate-50 p-6">
             <div className="max-w-7xl mx-auto">
                 {/* HEADER */}
-                <div className="mb-8 bg-gradient-to-r from-blue-500 via-cyan-400 to-teal-500 text-white px-8 py-12 w-full rounded-3xl">
+                <div className="mb-8 bg-linear-to-r from-blue-500 via-cyan-400 to-teal-500 text-white px-8 py-12 w-full rounded-3xl">
                     <h1 className="text-4xl font-bold text-slate-900">
                         My Bookings
                     </h1>

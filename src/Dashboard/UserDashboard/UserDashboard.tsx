@@ -32,7 +32,7 @@ const UserDashboard = () => {
     <div className="flex-1 min-h-screen bg-slate-50 pb-10">
 
       {/* HEADER */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-12 w-full rounded-3xl">
+      <div className="bg-linear-to-r from-indigo-600 to-purple-600 text-white px-8 py-12 w-full rounded-3xl">
 
         <h1 className="text-4xl font-bold mb-2">
           Welcome back, {userName}

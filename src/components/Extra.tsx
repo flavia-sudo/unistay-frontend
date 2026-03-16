@@ -2,7 +2,7 @@ import { ArrowRight } from "lucide-react";
 
 const Extra = () => {
   return (
-    <section className="w-full py-24 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500">
+    <section className="w-full py-24 bg-linear-to-r from-indigo-600 via-purple-600 to-pink-500">
       <div className="max-w-5xl mx-auto px-6 text-center text-white">
         
         {/* Heading */}

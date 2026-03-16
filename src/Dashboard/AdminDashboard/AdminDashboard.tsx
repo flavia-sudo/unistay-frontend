@@ -197,17 +197,17 @@ export default function AdminDashboard() {
 
         {/* Quick Stats */}
         <div className="grid sm:grid-cols-3 gap-4 mb-8">
-          <div className="rounded-xl shadow-sm p-6 bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+          <div className="rounded-xl shadow-sm p-6 bg-linear-to-br from-indigo-500 to-purple-600 text-white">
             <p className="text-indigo-100">Students</p>
             <p className="text-3xl font-bold">{students}</p>
           </div>
 
-          <div className="rounded-xl shadow-sm p-6 bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
+          <div className="rounded-xl shadow-sm p-6 bg-linear-to-br from-emerald-500 to-teal-600 text-white">
             <p className="text-emerald-100">Landlords</p>
             <p className="text-3xl font-bold">{landlords}</p>
           </div>
 
-          <div className="rounded-xl shadow-sm p-6 bg-gradient-to-br from-amber-500 to-orange-600 text-white">
+          <div className="rounded-xl shadow-sm p-6 bg-linear-to-br from-amber-500 to-orange-600 text-white">
             <p className="text-amber-100">Pending Approvals</p>
             <p className="text-3xl font-bold">{pendingHostels}</p>
           </div>

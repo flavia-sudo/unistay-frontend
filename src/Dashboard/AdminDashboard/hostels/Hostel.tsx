@@ -36,9 +36,9 @@ const AllHostels = () => {
       <div className="max-w-7xl mx-auto">
         
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900">Hostels</h1>
-          <p className="text-slate-500 mt-1">
+        <div className="mb-8 bg-linear-to-r from-blue-500 via-blue-600 to-blue-700 rounded-2xl shadow-sm px-8 py-12">
+          <h1 className="text-4xl font-bold text-slate-900">Hostels</h1>
+          <p className="text-slate-900 mt-5">
             Manage your hostels
           </p>
         </div>

@@ -122,7 +122,7 @@ const Features = () => {
           {/* Search Button */}
           <button
             onClick={() => {}}
-            className="px-8 py-3 rounded-xl text-white font-semibold bg-gradient-to-r from-indigo-500 to-purple-600 hover:opacity-90 transition"
+            className="px-8 py-3 rounded-xl text-white font-semibold bg-linear-to-r from-indigo-500 to-purple-600 hover:opacity-90 transition"
           >
             Search
           </button>

@@ -2,13 +2,13 @@ import { ArrowRight, MapPin } from "lucide-react";
 
 const Hero = () => {
   return (
-    <section className="w-full relative bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-800 text-white overflow-hidden">
+    <section className="w-full relative bg-linear-to-br from-indigo-600 via-purple-600 to-indigo-800 text-white overflow-hidden">
       
       {/* Background image */}
       <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=1920')] bg-cover bg-center opacity-20" />
 
       {/* Dark overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/80 to-purple-900/60" />
+      <div className="absolute inset-0 bg-linear-to-r from-indigo-900/80 to-purple-900/60" />
 
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
