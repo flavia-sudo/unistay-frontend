@@ -10,7 +10,7 @@ export default function UserLayout() {
     <div className="flex min-h-screen">
 
       {/* Sidebar */}
-      <div className="w-64 bg-gray-900 hidden md:block">
+      <div className="w-64 bg-gray-900 hidden md:block shrink-0">
         <UserDrawer />
       </div>
 
@@ -27,7 +27,7 @@ export default function UserLayout() {
       )}
 
       {/* Page Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col ml-4">
         {/* Mobile Top Bar */}
         <div className="md:hidden flex items-center bg-gray-900 text-white p-4">
             <button onClick={() => setDrawerOpen(true)} className="mr-4">

@@ -17,6 +17,7 @@ import Review from "./Dashboard/AdminDashboard/reviews/Review";
 import AdminLayout from "./Dashboard/AdminDashboard/AdminLayout";
 import UserLayout from "./Dashboard/UserDashboard/UserLayout";
 import UserDashboard from "./Dashboard/UserDashboard/UserDashboard";
+import UserBooking from "./Dashboard/UserDashboard/booking/UserBooking";
 
 function App() {
   return (
@@ -42,6 +43,8 @@ function App() {
           </Route>
           <Route path='/dashboard' element={<UserLayout />}>
           <Route index element={<UserDashboard />} />
+          <Route path='dashboard' element={<UserDashboard />} />
+          <Route path='bookings' element={<UserBooking />} />
           </Route>
           <Route path="*" element={<NotFound/>} />
         </Routes>
