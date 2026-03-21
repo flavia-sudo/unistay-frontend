@@ -10,7 +10,7 @@ export default function UserLayout() {
     <div className="flex min-h-screen">
 
       {/* Sidebar */}
-      <div className="w-64 bg-gray-900 hidden md:block shrink-0">
+      <div className="w-64 bg-gray-900 hidden md:block sticky top-0 left-0 h-screen">
         <UserDrawer />
       </div>
 
@@ -35,7 +35,7 @@ export default function UserLayout() {
             </button>
             <h1 className="text-lg font-bold">User Dashboard</h1>
         </div>
-      <div className="flex-1 p-4 md:p-6">
+      <div className="flex-1">
         <Outlet />
       </div>
     </div>

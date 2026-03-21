@@ -58,15 +58,15 @@ const AllBookings = () => {
     .reduce((sum, b) => sum + Number(b.totalAmount || 0), 0);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div className="min-h-full w-full bg-slate-50 p-6">
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900">
+        <div className="mb-8 bg-linear-to-r from-blue-500 via-cyan-400 to-teal-500 text-white px-8 py-12 w-full rounded-3xl">
+          <h1 className="text-4xl font-bold text-slate-900">
             All Bookings
           </h1>
-          <p className="text-slate-500 mt-1">
+          <p className="text-slate-700 mt-5">
             Overview of all hostel reservations
           </p>
         </div>

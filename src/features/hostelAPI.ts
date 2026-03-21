@@ -10,6 +10,7 @@ export type THostel = {
     contact_number: string;
     description: string;
     image_URL: string;
+    price: number;
 }
 
 export const hostelsAPI = createApi({

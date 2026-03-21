@@ -4,7 +4,7 @@ import { IoCloseSharp } from "react-icons/io5";
 
 const AdminDrawer = ({ onClose }: { onClose?: () => void }) => {
   return (
-    <div className="h-full w-64 bg-gray-900 text-white flex flex-col shadow-xl p-4">
+    <div className="h-full ww-72 shrink-0 bg-gray-900 text-white flex flex-col shadow-xl p-5">
         <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold tracking-wide text-white">
             Admin Panel
@@ -19,22 +19,22 @@ const AdminDrawer = ({ onClose }: { onClose?: () => void }) => {
           </button>
         )}
         </div>
-        <ul className="flex flex-col gap-2">
+        <ul className="flex flex-col gap-3 mt-4">
             {
                 adminDrawerData.map((item) => (
                     <li key={item.id}>
                         <NavLink to={item.link}
                         className={({ isActive })=>
-                        `flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200
+                        `flex items-center gap-4 px-5 py-3 rounded-xl transition-all duration-200
                         ${
                           isActive
                             ? "bg-blue-500 text-white shadow"
                             : "text-gray-300 hover:bg-gray-700 hover:text-white"
                         }`}>
-                        <div className="p-2 bg-gray-800 rounded-md">
+                        <div className="p-3 bg-gray-800 rounded-md">
                           <item.icon size={18} />
                         </div>
-                        <span className="text-sm font-medium">
+                        <span className="text-base font-semibold">
                         {item.name}
                         </span>
                         </NavLink>

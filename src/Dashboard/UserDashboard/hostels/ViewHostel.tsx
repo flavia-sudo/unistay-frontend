@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { Search, MapPin, Wifi, Car, Utensils } from "lucide-react";
 import { hostelsAPI, type THostel } from "../../../features/hostelAPI";
-import { roomsAPI, type TRoom } from "../../../features/roomAPI";
 import { useNavigate } from "react-router-dom";
 import greenValleyImg from "../../../assets/images/victor-birai-GmXr5dNL3YI-unsplash.jpg";
 
@@ -17,11 +16,13 @@ const Hostels = () => {
   const { data: hostelsData = [], isLoading } =
     hostelsAPI.useGetHostelsQuery();
 
-  const { data: roomsData = [] } = roomsAPI.useGetRoomsQuery();
+    console.log(hostelsData);
 
-  const hostels = hostelsData as THostelWithRelations[];
-
-  const rooms = roomsData as TRoom[];
+  const hostels: THostelWithRelations[] = Array.isArray(hostelsData)
+  ? hostelsData
+  : 'data' in hostelsData
+    ? hostelsData.data
+    : [];
 
   const [search, setSearch] = useState("");
 
@@ -34,7 +35,7 @@ const Hostels = () => {
   }, [hostels, search]);
 
   return (
-    <section className="w-full min-h-screen bg-gray-100 py-16 px-6">
+    <section className="w-full min-h-screen bg-slate-50 py-16 px-6">
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
@@ -81,19 +82,14 @@ const Hostels = () => {
                 {/* Image */}
                 <div className="relative">
                   <img
-                    src={greenValleyImg}
+                    src={hostel.image_URL || greenValleyImg}
                     alt={hostel.hostelName}
                     className="w-full h-72 object-cover"
                   />
 
-                  {/* Rooms badge */}
-                  <div className="absolute top-4 left-4 bg-green-500 text-white text-sm font-semibold px-4 py-1 rounded-full shadow">
-                    {hostel.rooms_available || 8} rooms available
-                  </div>
-
                   {/* Price badge */}
                   <div className="absolute bottom-4 right-4 bg-white text-purple-700 font-bold text-xl px-5 py-2 rounded-xl shadow-lg">
-                    Ksh {rooms.price || 24000}
+                    Ksh {hostel.price ?? 0}
                     <span className="text-sm text-gray-500 font-medium">
                       /sem
                     </span>

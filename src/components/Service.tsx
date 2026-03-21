@@ -32,7 +32,7 @@ const Services = () => {
       name: "Green Valley Hostels",
       address: "Ndagani",
       type: "Bedsitter",
-      price: 24000,
+      price: 22000,
       rating: 4,
       roomsAvailable: 1,
       image:

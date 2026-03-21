@@ -71,7 +71,7 @@ const Header = () => {
                             <div className='text-black text-xl'>
                             <nav className="hidden md:flex space-x-8">
                                 <NavLink to="/" className={getLinkClass} data-testid="desktop-home">Home</NavLink>
-                                <NavLink to="/hostels" className={getLinkClass} data-testid="desktop-search">
+                                <NavLink to="/admin/hostels" className={getLinkClass} data-testid="desktop-search">
                                 Browse Hostels</NavLink>
                                 {isLoggedIn && (
                                     <NavLink to="/dashboard" className={getLinkClass} data-testid="desktop-dashboard">Dashboard</NavLink>

@@ -143,7 +143,7 @@ const UserDashboard = () => {
 
             {/* Hostels */}
             <div
-              onClick={() => navigate("/hostels")}
+              onClick={() => navigate("/dashboard/hostels")}
               className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-3 rounded-lg"
             >
 

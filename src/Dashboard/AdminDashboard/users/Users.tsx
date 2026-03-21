@@ -41,35 +41,35 @@ const Users = () => {
   return (
     <div className="p-6 min-h-screen bg-slate-50">
         <div className="max-w-7xl mx-auto">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-slate-900">Users</h1>
-                <p className="text-slate-500 mt-1">Manage all registered users</p>
+            <div className="mb-8 bg-linear-to-r from-indigo-500 via-purple-500 to-indigo-600 text-white rounded-2xl px-8 py-12 shadow-sm">
+                <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Users</h1>
+                <p className="text-slate-900 mt-5">Manage all registered users</p>
             </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-xl shadow">
-          <p className="text-gray-500">Total Users</p>
-          <h2 className="text-3xl font-bold">{totalUsers}</h2>
+        <div className="p-6 rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition">
+          <p className="text-slate-500">Total Users</p>
+          <h2 className="text-3xl font-semibold text-slate-800 mt-2">{totalUsers}</h2>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow">
-          <p className="text-gray-500">Students</p>
-          <h2 className="text-3xl font-bold text-green-600">{students.length}</h2>
+        <div className="p-6 rounded-2xl border border-green-100 bg-green-100 shadow-sm hover:shadow-md transition">
+          <p className="text-green-700">Students</p>
+          <h2 className="text-3xl font-bold text-green-700 mt-2">{students.length}</h2>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow">
-          <p className="text-gray-500">Landlords</p>
-          <h2 className="text-3xl font-bold text-blue-600">{landlords.length}</h2>
+        <div className="p-6 rounded-2xl border border-blue-100 bg-blue-100 shadow-sm hover:shadow-md transition">
+          <p className="text-blue-700">Landlords</p>
+          <h2 className="text-3xl font-semibold text-blue-700 mt-2">{landlords.length}</h2>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow">
-          <p className="text-gray-500">Admins</p>
-          <h2 className="text-3xl font-bold text-purple-600">{admins.length}</h2>
+        <div className="p-6 rounded-2xl border border-purple-100 bg-purple-50 shadow-sm hover:shadow-md transition">
+          <p className="text-purple-700">Admins</p>
+          <h2 className="text-3xl font-bold text-purple-700 mt-2">{admins.length}</h2>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm p-4 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="bg-white/80 backdrop-blur border border-slate-200 rounded-2xl shadow-sm p-4 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="relative w-full md:w-2/3">
         <Search className="absolute left-3 top-3.5 w-4 h-4 text-slate-400"/>
         <input
@@ -84,7 +84,7 @@ const Users = () => {
         <select
         value={roleFilter}
         onChange={(e) => setRoleFilter(e.target.value as "all" | "Student" | "Landlord" | "Admin")}
-        className="w-full md:w-48 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none">
+        className="w-full md:w-48 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none transition">
         <option value="all">All Roles</option>
         <option value="Student">Student</option>
         <option value="Landlord">Landlord</option>
@@ -94,7 +94,7 @@ const Users = () => {
 
       <div className="bg-white rounded-2xl shadow-sm p-6">
         {isLoading ? (
-            <p className="text-center text-slate-500">Loading...</p>
+            <p className="text-center text-slate-500 py-10">Loading...</p>
         ) : (
             <table className="w-full text-left">
                 <thead>
@@ -120,7 +120,16 @@ const Users = () => {
                                 {user.email}
                             </td>
                             <td className="py-4 text-slate-600">
+                                <span className={`px-3 py-1 text-xs font-medium rounded-full
+                                ${
+                                user.role === "student"
+                                    ? "bg-green-100 text-green-700"
+                                    : user.role === "Landlord"
+                                    ? "bg-blue-100 text-blue-700"
+                                    : "bg-purple-100 text-purple-700"
+                                }`}>
                                 {user.role}
+                                </span>
                             </td>
                             <td className="py-4 text-slate-600">
                                 {user.verified ? "Yes" : "No"}
@@ -139,7 +148,7 @@ const Users = () => {
                                     setSelectedUser(user);
                                     (document.getElementById("delete_modal") as HTMLDialogElement)?.showModal();
                                 }}
-                                className="p-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-600">
+                                className="p-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 transition">
                                     <Trash2 size={16} />
                                 </button>
                             </td>

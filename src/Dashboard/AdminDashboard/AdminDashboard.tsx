@@ -149,14 +149,13 @@ export default function AdminDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="flex-1 min-h-screen bg-slate-50 pb-10">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
+        <div className="bg-linear-to-r from-indigo-600 to-purple-600 text-white px-8 py-12 w-full rounded-3xl ">
+          <h1 className="text-4xl mb-2 font-bold">
             Admin Dashboard
           </h1>
-          <p className="text-slate-500 mt-1">
+          <p className="text-indigo-100 mb-6">
             Overview of your platform
           </p>
         </div>
@@ -324,7 +323,6 @@ export default function AdminDashboard() {
               )}
             </div>
           </div>
-          <div className="grid lg:grid-cols-2 gap-6 mt-6">
 
             {/* Maintenance Requests */}
             <div className="bg-white shadow-sm rounded-xl">
@@ -420,9 +418,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-          </div>
         </div>
-      </div>
     </div>
   );
 }
