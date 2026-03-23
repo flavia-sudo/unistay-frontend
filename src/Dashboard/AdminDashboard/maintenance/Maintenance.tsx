@@ -52,11 +52,11 @@ const Maintenance = () => {
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900">
+        <div className="mb-8 bg-linear-to-r from-emerald-400 via-emerald-500 to-emerald-600 rounded-2xl shadow-sm px-8 py-10">
+          <h1 className="text-4xl font-bold text-slate-900">
             Maintenance Requests
           </h1>
-          <p className="text-slate-500 mt-1">
+          <p className="text-slate-800 mt-4">
             Track and manage all reported issues
           </p>
         </div>

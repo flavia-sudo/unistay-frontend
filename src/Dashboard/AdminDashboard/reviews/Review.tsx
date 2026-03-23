@@ -6,27 +6,29 @@ type TReviewWithRelations = TReview & {
 
 const Review = () => {
   const { data, isLoading } = reviewsAPI.useGetReviewsQuery();
+  console.log("Reviews:", data);
 
-  const reviews: TReviewWithRelations[] = data?.data ?? [];
+  const reviews: TReviewWithRelations[] = 
+  Array.isArray(data)? data : data?. data ?? [];
 
   const totalReviews = reviews.length;
 
   return (
     <div className="p-6 min-h-screen bg-slate-50">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8 bg-linear-to-r from-indigo-400 via-purple-500 to-purple-600 rounded-2xl shadow-sm px-8 py-10">
+          <h1 className="text-4xl font-bold text-slate-900">
             Reviews
           </h1>
-          <p className="text-slate-500 mt-1">
+          <p className="text-slate-800 mt-4">
             Admin view of all hostel reviews
           </p>
         </div>
 
         {/* Stats */}
-        <div className="bg-white p-6 rounded-xl shadow mb-6">
-          <p className="text-gray-500">Total Reviews</p>
-          <h2 className="text-3xl font-bold">{totalReviews}</h2>
+        <div className="mb-6 bg-indigo-50 border border-indigo-100 rounded-2xl shadow-sm px-8 py-6">
+          <p className="text-indigo-700">Total Reviews</p>
+          <h2 className="text-4xl font-bold text-indigo-700 mt-3">{totalReviews}</h2>
         </div>
 
         {/* Table */}
@@ -56,8 +58,25 @@ const Review = () => {
                       {review.hostelName}
                     </td>
 
-                    <td className="py-4 text-slate-600">
-                      {review.rating}
+                    <td className="py-4">
+                      <div className="flex items-center gap-2">
+                        <div className="flex">
+                          {Array.from({ length: 5}).map((_, index) => (
+                            <span
+                              key={index}
+                              className={
+                                index < review.rating
+                                ? "text-yellow-400 text-lg"
+                                : "text-gray-300 text-lg"
+                              }
+                              >★
+                            </span>
+                          ))}
+                        </div>
+                        <span className="text-sm text-slate-500">
+                          ({review.rating})
+                        </span>
+                      </div>
                     </td>
 
                     <td className="py-4 text-slate-600">

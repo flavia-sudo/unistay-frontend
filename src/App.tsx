@@ -40,7 +40,7 @@ function App() {
             <Route path='bookings' element={<AllBookings />} />
             <Route path='payments' element={<Payment />} />
             <Route path='maintenance' element={<Maintenance />} />
-            <Route path='reviews' element={<Review />} />
+            <Route path='review' element={<Review />} />
           </Route>
           <Route path='/dashboard' element={<UserLayout />}>
           <Route index element={<UserDashboard />} />

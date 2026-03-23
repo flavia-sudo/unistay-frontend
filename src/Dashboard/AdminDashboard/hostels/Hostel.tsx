@@ -69,6 +69,7 @@ const AllHostels = () => {
             <table className="w-full text-left">
               <thead>
                 <tr className="text-slate-500 text-sm border-b">
+                  <th className="pb-3">Image</th>
                   <th className="pb-3">Hostel</th>
                   <th className="pb-3">First Name</th>
                   <th className="pb-3">Last Name</th>
@@ -83,6 +84,13 @@ const AllHostels = () => {
                     key={hostel.hostelId}
                     className="border-b last:border-none"
                   >
+                    <td className="py-4">
+                      <img
+                      src={hostel.image_URL}
+                      alt={hostel.hostelName}
+                      className="w-20 h-16 object-cover rounded-lg border"
+                    />
+                      </td>
                     <td className="py-4 font-medium text-slate-900">
                       {hostel.hostelName}
                     </td>
