@@ -45,6 +45,9 @@ export const maintenanceAPI = createApi({
         getMaintenanceByRoomId: builder.query<{ data: TMaintenance[] }, number>({
             query: (roomId) => `/maintenance/room/${roomId}`,
         }),
+        getMaintenanceByUserId: builder.query<{ data: TMaintenance[] }, number>({
+            query: (userId) => `/maintenance/user/${userId}`,
+        }),
         updateMaintenance: builder.mutation<TMaintenance, Partial<TMaintenance> & { maintenanceId: number }>({
             query: (updatedMaintenance) => ({
                 url: `/maintenance/${updatedMaintenance.maintenanceId}`,

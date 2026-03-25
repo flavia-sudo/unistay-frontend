@@ -19,6 +19,7 @@ import UserLayout from "./Dashboard/UserDashboard/UserLayout";
 import UserDashboard from "./Dashboard/UserDashboard/UserDashboard";
 import UserBooking from "./Dashboard/UserDashboard/booking/UserBooking";
 import Hostels from "./Dashboard/UserDashboard/hostels/ViewHostel";
+import UserMaintenance from "./Dashboard/UserDashboard/maintenance/ViewMaintenance";
 
 function App() {
   return (
@@ -47,6 +48,9 @@ function App() {
           <Route path='dashboard' element={<UserDashboard />} />
           <Route path='bookings' element={<UserBooking />} />
           <Route path='hostels' element={<Hostels />} />
+          <Route path='maintenance' element={< UserMaintenance />} />
+          <Route path='Userreview' element={<Review />} />
+          <Route path='Userpayment' element={<Payment />} />
           </Route>
           <Route path="*" element={<NotFound/>} />
         </Routes>
