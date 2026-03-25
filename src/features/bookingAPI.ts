@@ -40,9 +40,8 @@ endpoints: (builder) => ({
         }),
         invalidatesTags: ["Bookings"],
     }),
-    getBookings: builder.query< TBooking[], void>({
+    getBookings: builder.query<{ data: TBooking[] }, void>({
         query: () => "/booking_all",
-        transformResponse: (response: { data: TBooking[] }) => response.data,
         providesTags: ["Bookings"],
     }),
     getBookingById: builder.query<TBooking, number>({

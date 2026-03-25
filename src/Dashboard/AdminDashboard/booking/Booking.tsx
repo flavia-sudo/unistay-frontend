@@ -15,14 +15,13 @@ const AllBookings = () => {
   const { data: bookingsData, isLoading } =
     bookingsAPI.useGetBookingsQuery();
 
-  const bookings = bookingsData || [];
+  const bookings: TBookingWithRelations[] = bookingsData?. data ?? [];
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "confirmed" | "cancelled">("all");
   const [selectedBooking, setSelectedBooking] =
     useState<TBookingWithRelations | null>(null);
 
-  // ---------------- FILTERING ----------------
   const filteredBookings = useMemo(() => {
     return (bookings as TBookingWithRelations[]).filter((booking) => {
       const searchLower = search.toLowerCase();
@@ -42,7 +41,6 @@ const AllBookings = () => {
     });
   }, [bookings, search, statusFilter]);
 
-  // ---------------- STATS ----------------
   const total = bookings.length;
 
   const confirmed = (bookings as TBookingWithRelations[]).filter(
@@ -76,7 +74,7 @@ const AllBookings = () => {
           <StatCard title="Total" value={total} />
           <StatCard title="Confirmed" value={confirmed} color="text-emerald-600" />
           <StatCard title="Cancelled" value={cancelled} color="text-red-600" />
-          <StatCard title="Revenue" value={`$${revenue.toLocaleString()}`} color="text-indigo-600" />
+          <StatCard title="Revenue" value={`Ksh ${revenue.toLocaleString()}`} color="text-indigo-600" />
         </div>
 
         {/* Search + Filter */}
@@ -143,7 +141,7 @@ const AllBookings = () => {
                       {booking.roomNumber}
                     </td>
                     <td className="py-4 font-semibold">
-                      ${Number(booking.totalAmount).toLocaleString()}
+                      Ksh {Number(booking.totalAmount).toLocaleString()}
                     </td>
                     <td className="py-4">
                       <StatusBadge status={booking.bookingStatus} />

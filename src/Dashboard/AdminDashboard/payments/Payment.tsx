@@ -13,7 +13,7 @@ type TPaymentWithRelations = TPayment & {
 const Payment = () => {
     const { data: paymentsData, isLoading } = paymentsAPI.useGetPaymentsQuery();
 
-    const payments: TPaymentWithRelations[] = paymentsData?.data ?? [];
+    const payments: TPaymentWithRelations[] = paymentsData?. data ?? [];
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState<"all" | "confirmed" | "pending">("all");
     const [selectedPayment, setSelectedPayment] = useState<TPaymentWithRelations | null>(null);
@@ -39,28 +39,29 @@ const Payment = () => {
     const total = payments.length;
     const confirmedPayments = (payments as TPaymentWithRelations[]).filter((payment) => payment.paymentStatus === true).length;
     const pendingPayments = (payments as TPaymentWithRelations[]).filter((payment) => payment.paymentStatus === false).length;
-
-    // const totalCompletedAmount = (payments as TPaymentWithRelations[]).filter((p) => p.paymentStatus === true).reduce((sum, p) => sum + p.amount, 0);
-    // const totalPendingAmount = (payments as TPaymentWithRelations[]).filter((p) => p.paymentStatus === false).reduce((sum, p) => sum + p.amount, 0);
+    const revenue = (payments as TPaymentWithRelations[])
+    .filter((payment) => payment.paymentStatus === true)
+    .reduce((sum, payment) => sum + payment.amount, 0);
 
     return (
-        <div className="p-6 min-h-screen bg-slate-50">
+      <div className="p-6 min-h-screen bg-slate-50">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900">
+        <div className="mb-8 bg-linear-to-r from-blue-500 via-blue-600 to-blue-700 text-white px-8 py-12 w-full rounded-3xl">
+          <h1 className="text-4xl font-bold text-slate-900">
             Payments
           </h1>
-          <p className="text-slate-500 mt-1">
+          <p className="text-slate-700 mt-5">
             Track all payment transactions
           </p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <StatCard title="Total" value={total} />
-          <StatCard title="Confirmed" value={confirmedPayments} />
-          <StatCard title="Cancelled" value={pendingPayments} />
+          <StatCard title="Total" value={total} color="text-blue-600" bgColor="bg-blue-100" />
+          <StatCard title="Confirmed" value={confirmedPayments} color="text-emerald-600" bgColor="bg-emerald-100" />
+          <StatCard title="Pending" value={pendingPayments} color="text-rose-600" bgColor="bg-rose-100"/>
+          <StatCard title="Revenue" value={`Ksh ${revenue.toLocaleString()}`} color="text-sky-600" bgColor="bg-sky-100" />
         </div>
 
         {/* Search + Filter */}
@@ -85,7 +86,7 @@ const Payment = () => {
           >
             <option value="all">All Status</option>
             <option value="confirmed">Confirmed</option>
-            <option value="cancelled">Pending</option>
+            <option value="pending">Pending</option>
           </select>
         </div>
 
@@ -134,7 +135,7 @@ const Payment = () => {
                     </td>
 
                     <td className="py-4 text-slate-600">
-                      ${Number(payment.amount).toLocaleString()}
+                      Ksh {Number(payment.amount).toLocaleString()}
                     </td>
 
                     <td className="py-4 text-slate-600">
@@ -145,7 +146,7 @@ const Payment = () => {
                       <StatusBadge status={payment.paymentStatus} />
                     </td>
 
-                    <td className="py-4 text-right space-x-2">
+                    <td className="py-4">
                       <button
                       onClick={() => {
                         setSelectedPayment(payment);
@@ -175,19 +176,21 @@ const StatCard = ({
   title,
   value,
   color = "text-slate-900",
+  bgColor = "bg-white",
 }: {
   title: string;
   value: string | number;
   color?: string;
+  bgColor?: string;
 }) => (
-  <div className="bg-white rounded-2xl shadow-sm p-5">
+  <div className={`rounded-2xl shadow-sm p-6 ${bgColor}`}>
     <p className="text-slate-500 text-sm">{title}</p>
     <p className={`text-2xl font-bold mt-2 ${color}`}>{value}</p>
   </div>
 );
 
 const StatusBadge = ({ status }: { status: boolean }) => {
-  const label = status ? "Confirmed" : "Cancelled";
+  const label = status ? "Confirmed" : "Pending";
 
   const styles = status
     ? "bg-emerald-100 text-emerald-700"
