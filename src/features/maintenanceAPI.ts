@@ -8,7 +8,7 @@ export type TMaintenance = {
     userId: number;
     issueTitle: string;
     description: string;
-    status: boolean;
+    status: string;
     date_reported: Date;
     date_resolved: Date;
 }

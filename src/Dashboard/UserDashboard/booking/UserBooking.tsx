@@ -11,14 +11,14 @@ type TBookingWithRelations = TBooking & {
 };
 
 const UserBooking = () => {
-    const userString = localStorage.getItem("user");
+    const userString = localStorage.getItem("User");
     const user = userString ? JSON.parse(userString) : null;
     const userId = user?.userId;
     const { data: bookingData, isLoading } = bookingsAPI.useGetBookingByUserIdQuery(userId, {
         refetchOnMountOrArgChange: true,
         pollingInterval: 50000,
     });
-    const booking = bookingData ||[];
+    const booking = bookingData?.data || [];
     const [search, setSearch] = useState("");
     const [selectedBooking, setSelectedBooking] = useState<TBookingWithRelations | null>(null);
     const [statusFilter, setStatusFilter] = useState<"all" | "confirmed" | "cancelled">("all");

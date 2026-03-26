@@ -77,7 +77,7 @@ const CreateMaintenance = () => {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Hostel Name */}
           <div className="form-control w-full">
-            <label className="block text-sm font-medium xtext-gray-700mb-1">Hostel Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Hostel Name</label>
             <input
               type="text"
               {...register("hostelName")}

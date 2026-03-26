@@ -43,6 +43,9 @@ export const reviewsAPI = createApi({
         getReviewByHostelId: builder.query<{ data: TReview[] }, number>({
             query: (hostelId) => `/review/hostel/${hostelId}`,
         }),
+        getReviewByUserId: builder.query<{ data: TReview[] }, number>({
+            query: (userId) => `/review/user/${userId}`,
+        }),
         updateReview: builder.mutation<TReview, Partial<TReview> & { reviewId: number }>({
             query: (updatedReview) => ({
                 url: `/review/${updatedReview.reviewId}`,

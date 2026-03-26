@@ -19,7 +19,7 @@ const Maintenance = () => {
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] =
-    useState<"all" | "resolved" | "pending">("all");
+    useState<"all" | "resolved" | "in progress" |"pending">("all");
   const [selectedMaintenance, setSelectedMaintenance] =
     useState<TMaintenanceWithRelations | null>(null);
 
@@ -35,17 +35,25 @@ const Maintenance = () => {
         maintenance.roomNumber?.toLowerCase().includes(searchLower);
 
       const matchesStatus =
-        statusFilter === "all" ||
-        (statusFilter === "resolved" && maintenance.status === true) ||
-        (statusFilter === "pending" && maintenance.status === false);
+        statusFilter === "all" || maintenance.status === statusFilter;
 
       return matchesSearch && matchesStatus;
     });
   }, [maintenances, search, statusFilter]);
 
   const total = maintenances.length;
-  const resolved = maintenances.filter((m) => m.status === true).length;
-  const pending = maintenances.filter((m) => m.status === false).length;
+
+  const resolved = maintenances.filter(
+    (m) => m.status === "resolved"
+  ).length;
+
+  const inProgress = maintenances.filter(
+    (m) => m.status === "in progress"
+  ).length;
+
+  const pending = maintenances.filter(
+    (m) => m.status === "pending"
+  ).length;
 
   return (
     <div className="p-6 min-h-screen bg-slate-50">
@@ -65,6 +73,7 @@ const Maintenance = () => {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           <StatCard title="Total Requests" value={total} />
           <StatCard title="Resolved" value={resolved} />
+          <StatCard title="In Progress" value={inProgress} />
           <StatCard title="Pending" value={pending} />
         </div>
 
@@ -85,13 +94,14 @@ const Maintenance = () => {
             value={statusFilter}
             onChange={(e) =>
               setStatusFilter(
-                e.target.value as "all" | "resolved" | "pending"
+                e.target.value as "all" | "resolved" | "in progress" | "pending"
               )
             }
             className="w-full md:w-48 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
           >
             <option value="all">All Status</option>
             <option value="resolved">Resolved</option>
+            <option value="in progress">In Progress</option>
             <option value="pending">Pending</option>
           </select>
         </div>
@@ -199,12 +209,20 @@ const StatCard = ({
   </div>
 );
 
-const StatusBadge = ({ status }: { status: boolean }) => {
-  const label = status ? "Resolved" : "Pending";
+const StatusBadge = ({ status }: { status: string }) => {
+  let styles = "";
+  let label = status;
 
-  const styles = status
-    ? "bg-emerald-100 text-emerald-700"
-    : "bg-amber-100 text-amber-700";
+  if (status === "resolved") {
+    styles = "bg-emerald-100 text-emerald-700";
+    label = "Resolved";
+  } else if (status === "in progress") {
+    styles = "bg-blue-100 text-blue-700";
+    label = "In Progress";
+  } else if (status === "pending") {
+    styles = "bg-amber-100 text-amber-700";
+    label = "Pending";
+  }
 
   return (
     <span className={`px-3 py-1 rounded-full text-xs font-medium ${styles}`}>

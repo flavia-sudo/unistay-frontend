@@ -83,7 +83,7 @@ const Review = () => {
                       {review.comment}
                     </td>
 
-                    <td className="py-4 text-slate-500 text-sm">
+                    <td className="py-4 text-slate-600 text-sm">
                       {new Date(review.createdAt).toLocaleDateString()}
                     </td>
                   </tr>
