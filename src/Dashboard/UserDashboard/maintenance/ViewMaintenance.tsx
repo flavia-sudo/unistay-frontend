@@ -12,6 +12,8 @@ const UserMaintenance = () => {
   const storedUser = localStorage.getItem("User");
   const user = storedUser ? JSON.parse(storedUser) : null;
   const userId = user?.userId;
+  console.log("User object:", user);
+  console.log("UserId being sent:", userId);
 
   const { data: maintenanceData, isLoading, error } =
     maintenanceAPI.useGetMaintenanceByUserIdQuery(userId, {
@@ -19,10 +21,11 @@ const UserMaintenance = () => {
       refetchOnMountOrArgChange: true,
       pollingInterval: 50000,
     });
-    console.log("User maintenance:", maintenanceData?.data)
+    console.log("API response:", maintenanceData);
 
   const maintenances: TMaintenanceWithRelations[] =
     maintenanceData?.data ?? [];
+    console.log("Maintenances:", maintenanceData?.data)
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<

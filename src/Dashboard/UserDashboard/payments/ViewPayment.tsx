@@ -73,7 +73,7 @@ const UserPayment = () => {
     };
 
     return (
-        <div className="p-6 min-h-screen bg-slate-50">
+    <div className="p-6 min-h-screen bg-slate-50">
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
@@ -141,7 +141,7 @@ const UserPayment = () => {
             <option value="pending">Pending</option>
           </select>
         </div>
-
+        
         {/* Table */}
         {paymentsLoading && <p className="text-center text-slate-500">Loading payments...</p>}
         {paymentsError && <p className="text-red-600">Error loading payments</p>}
