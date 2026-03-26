@@ -16,6 +16,8 @@ const UserMaintenance = () => {
   const { data: maintenanceData, isLoading, error } =
     maintenanceAPI.useGetMaintenanceByUserIdQuery(userId, {
       skip: !userId,
+      refetchOnMountOrArgChange: true,
+      pollingInterval: 50000,
     });
     console.log("User maintenance:", maintenanceData?.data)
 

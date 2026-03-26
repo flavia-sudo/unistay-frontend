@@ -44,6 +44,9 @@ export const paymentsAPI = createApi({
         getPaymentByBookingId: builder.query<{ data: TPayment[] }, number>({
             query: (bookingId) => `/payment/booking/${bookingId}`,
         }),
+        getPaymentByUserId: builder.query<{ data: TPayment[] }, number>({
+            query: (userId) => `/payment/user/${userId}`,
+        }),
         updatePayment: builder.mutation<TPayment, Partial<TPayment> & { paymentId: number }>({
             query: (updatedPayment) => ({
                 url: `/payment/${updatedPayment.paymentId}`,

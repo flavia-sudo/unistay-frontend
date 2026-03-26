@@ -4,8 +4,6 @@ import { bookingsAPI, type TBooking } from "../../../features/bookingAPI";
 import UpdateBooking from "./UpdateBooking";
 
 type TBookingWithRelations = TBooking & {
-    firstName: string;
-    lastName: string;
     hostelName: string;
     roomNumber: string;
 };
@@ -85,8 +83,6 @@ const UserBooking = () => {
                         <table className="w-full text-left">
                             <thead>
                             <tr className="text-slate-500 text-sm border-b">
-                                <th className="pb-3">First Name</th>
-                                <th className="pb-3">Last Name</th>
                                 <th className="pb-3">Hostel</th>
                                 <th className="pb-3">Room</th>
                                 <th className="pb-3">Amount</th>
@@ -97,12 +93,6 @@ const UserBooking = () => {
                             <tbody>
                                 {filteredBookings.map((booking) => (
                                     <tr key={booking.bookingId} className="border-b last:border-none">
-                                       <td className="py-4 font-medium text-slate-900">
-                                        {booking.firstName}
-                                        </td>
-                                        <td className="py-4 font-medium text-slate-900">
-                                        {booking.lastName}
-                                        </td>
                                         <td className="py-4 text-slate-600">
                                         {booking.hostelName}
                                         </td>
