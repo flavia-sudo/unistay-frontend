@@ -12,7 +12,7 @@ type TPaymentWithRelations = TPayment & {
 };
 
 const UserPayment = () => {
-    const storedUser = localStorage.getItem("User");
+    const storedUser = localStorage.getItem("Student");
     const user = storedUser ? JSON.parse(storedUser) : null;
     const userId = user?.userId;
 

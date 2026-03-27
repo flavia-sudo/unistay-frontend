@@ -10,7 +10,7 @@ export type TRoom = {
     price: string;
     capacity: string;
     description: string;
-    status: boolean;
+    status: boolean | string | number;
 }
 
 export const roomsAPI = createApi({

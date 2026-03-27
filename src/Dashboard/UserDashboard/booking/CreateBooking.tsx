@@ -80,7 +80,7 @@ const schema = yup
         };
 
         return (
-            <dialog id="update_modal" className="fixed inset-0 z-50 bg-transparent">
+            <dialog id="create_modal" className="fixed inset-0 z-50 bg-transparent">
             <div
                 className="fixed inset-0 bg-black/50 backdrop-blur-sm"
                 onClick={handleClose}

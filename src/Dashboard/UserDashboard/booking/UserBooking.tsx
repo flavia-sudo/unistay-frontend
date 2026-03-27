@@ -9,7 +9,7 @@ type TBookingWithRelations = TBooking & {
 };
 
 const UserBooking = () => {
-    const userString = localStorage.getItem("User");
+    const userString = localStorage.getItem("Student");
     const user = userString ? JSON.parse(userString) : null;
     const userId = user?.userId;
     const { data: bookingData, isLoading } = bookingsAPI.useGetBookingByUserIdQuery(userId, {

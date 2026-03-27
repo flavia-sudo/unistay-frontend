@@ -1,117 +1,60 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { MdWavingHand } from "react-icons/md"
 import {
-  Building2,
   Users,
   Calendar,
   CreditCard,
   ArrowRight,
-  CheckCircle,
-  Clock,
+  Building2,
   Toolbox,
   PenLine,
 } from "lucide-react";
-
-interface User {
-  id: string;
-  role?: string;
-  name?: string;
-}
-
-interface Hostel {
-  id: string;
-  name: string;
-  landlord_name: string;
-  status: string;
-  images?: string[];
-}
-
-interface Booking {
-  id: string;
-  student_name: string;
-  hostel_name: string;
-  status: string;
-  total_amount: number;
-}
-
-interface Payment {
-  id: string;
-  status: string;
-  amount: number;
-}
-
-interface Maintenance {
-  id: string;
-  hostel_name: string;
-  room_number: string;
-  status: string;
-}
-
-interface Review {
-  id: string;
-  hostel_name: string;
-  rating: number;
-}
+import { usersAPI } from "../../features/userAPI";
+import { hostelsAPI } from "../../features/hostelAPI";
+import { bookingsAPI } from "../../features/bookingAPI";
+import { paymentsAPI } from "../../features/paymentAPI";
+import { maintenanceAPI } from "../../features/maintenanceAPI";
+import { reviewsAPI } from "../../features/reviewAPI";
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({
-    users: [] as User[],
-    hostels: [] as Hostel[],
-    bookings: [] as Booking[],
-    payments: [] as Payment[],
-    maintenance: [] as Maintenance[],
-    reviews: [] as Review[],
-  });
+  const { data: usersData, isLoading: usersLoading } = usersAPI.useGetUsersQuery();
+  const { data: hostelsData, isLoading: hostelsLoading } = hostelsAPI.useGetHostelsQuery();
+  const { data: bookingsData, isLoading: bookingsLoading } = bookingsAPI.useGetBookingsQuery();
+  const { data: paymentsData, isLoading: paymentsLoading } = paymentsAPI.useGetPaymentsQuery();
+  const { data: maintenanceData, isLoading: maintenanceLoading } = maintenanceAPI.useGetMaintenancesQuery();
+  const { data: reviewsData, isLoading: reviewsLoading } = reviewsAPI.useGetReviewsQuery();
 
-  const [loading, setLoading] = useState(true);
+  const loading = 
+    usersLoading ||
+    hostelsLoading ||
+    bookingsLoading ||
+    paymentsLoading ||
+    maintenanceLoading ||
+    reviewsLoading;
 
-  useEffect(() => {
-    loadData();
-  }, []);
+    const users = usersData?.data ?? [];
+    const hostels = Array.isArray(hostelsData) ? hostelsData : hostelsData?.data ?? [];
+    const bookings = bookingsData?.data ?? [];
+    const payments = paymentsData?.data ?? [];
+    const maintenance = maintenanceData?.data ?? [];
+    const reviews = Array.isArray(reviewsData) ? reviewsData : reviewsData?.data ?? [];
 
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [usersRes, hostelRes, bookingRes, paymentRes, maintenanceRes, reviewRes] =
-        await Promise.all([
-          fetch("/user_all", {credentials: "include"}),
-          fetch("/hostel_all", {credentials: "include"}),
-          fetch("/booking_all", {credentials: "include"}),
-          fetch("/payment_all", {credentials: "include"}),
-          fetch("/maintenance_all", {credentials: "include"}),
-          fetch("/review_all", {credentials: "include"})
 
-        ]);
-      const users: User[] = await usersRes.json();
-      const hostels: Hostel[] = await hostelRes.json();
-      const bookings: Booking[] = await bookingRes.json();
-      const payments: Payment[] = await paymentRes.json();
-      const maintenance: Maintenance[] = await maintenanceRes.json();
-      const reviews: Review[] = await reviewRes.json();
+ const students =
+  users.filter((u: any) => (u.role || u.user_type || "").toLowerCase() === "student").length;
 
-      setStats({ users, hostels, bookings, payments, maintenance, reviews });
-    } catch (err) {
-      console.error(err);
-    } finally {
-    setLoading(false);
-    }
-  };
+const landlords =
+  users.filter((u: any) => (u.role || u.user_type || "").toLowerCase() === "landlord").length;
 
-  const students =
-    stats.users.filter((u) => u.role === "student" || !u.role).length;
+const admins =
+  users.filter((u: any) => (u.role || u.user_type || "").toLowerCase() === "admin").length;
 
-  const landlords =
-    stats.users.filter((u) => u.role === "landlord").length;
+const pendingMaintenance =
+  maintenance.filter((m: any) => (m.status || "").toLowerCase() === "pending").length;
 
-  const pendingHostels =
-    stats.hostels.filter((h) => h.status === "pending").length;
-
-  const pendingMaintenance =
-    stats.maintenance.filter((m) => m.status === "pending").length;
-
-  const totalRevenue = stats.payments
-    .filter((p) => p.status === "completed")
-    .reduce((sum, p) => sum + (p.amount || 0), 0);
+const totalRevenue = payments
+  .filter((p: any) => (p.paymentStatus || "").toLowerCase() === "completed")
+  .reduce((sum: number, p: any) => sum + Number(p.amount || 0), 0);
 
   if (loading) {
     return (
@@ -153,36 +96,37 @@ export default function AdminDashboard() {
         {/* Header */}
         <div className="bg-linear-to-r from-indigo-600 to-purple-600 text-white px-8 py-12 w-full rounded-3xl ">
           <h1 className="text-4xl mb-2 font-bold">
-            Admin Dashboard
+            Welcome back, Admin
+            <MdWavingHand className="inline-block ml-2" color="yellow" />
           </h1>
-          <p className="text-indigo-100 mb-6">
+          <p className="text-indigo-100 mt-6">
             Overview of your platform
           </p>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           <StatCard
             title="Total Users"
-            value={stats.users.length}
+            value={users.length}
             Icon={Users}
             color="indigo"
           />
           <StatCard
             title="Total Hostels"
-            value={stats.hostels.length}
+            value={hostels.length}
             Icon={Building2}
             color="emerald"
           />
           <StatCard
             title="Total Bookings"
-            value={stats.bookings.length}
+            value={bookings.length}
             Icon={Calendar}
             color="amber"
           />
           <StatCard
             title="Total Revenue"
-            value={`$${totalRevenue.toLocaleString()}`}
+            value={`Ksh ${totalRevenue.toLocaleString()}`}
             Icon={CreditCard}
             color="purple"
           />
@@ -191,6 +135,12 @@ export default function AdminDashboard() {
             value={pendingMaintenance}
             Icon={Toolbox}
             color="rose"
+          />
+          <StatCard
+            title="Total Reviews"
+            value={reviews.length}
+            Icon={PenLine}
+            color="cyan"
           />
         </div>
 
@@ -207,218 +157,71 @@ export default function AdminDashboard() {
           </div>
 
           <div className="rounded-xl shadow-sm p-6 bg-linear-to-br from-amber-500 to-orange-600 text-white">
-            <p className="text-amber-100">Pending Approvals</p>
-            <p className="text-3xl font-bold">{pendingHostels}</p>
+            <p className="text-amber-100">Admins</p>
+            <p className="text-3xl font-bold">{admins}</p>
           </div>
         </div>
 
         {/* Bottom Section */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Recent Bookings */}
-          <div className="bg-white shadow-sm rounded-xl">
-            <div className="flex justify-between items-center p-5 border-b">
-              <h2 className="font-semibold text-slate-900">
-                Recent Bookings
-              </h2>
-              <Link to="/admin/bookings">
-                <button className="text-sm text-indigo-600 hover:underline flex items-center gap-1">
-                  View All <ArrowRight className="w-4 h-4" />
-                </button>
-              </Link>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-6">
+        
+        {/* Bookings */}
+        <Link to="/admin/bookings">
+          <div className="bg-white shadow-sm rounded-xl p-6 hover:shadow-md transition cursor-pointer">
+            <div className="flex items-center justify-between mb-4">
+              <Calendar className="w-6 h-6 text-indigo-600" />
+              <ArrowRight className="w-5 h-5 text-slate-400" />
             </div>
-
-            <div className="p-5">
-              {stats.bookings.length === 0 ? (
-                <div className="text-center py-8 text-slate-500">
-                  <Calendar className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-                  <p>No bookings yet</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {stats.bookings.slice(0, 5).map((booking) => (
-                    <div
-                      key={booking.id}
-                      className="flex justify-between items-center bg-slate-50 p-3 rounded-lg"
-                    >
-                      <div>
-                        <p className="font-medium text-slate-900">
-                          {booking.student_name}
-                        </p>
-                        <p className="text-sm text-slate-500">
-                          {booking.hostel_name}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-xs px-2 py-1 rounded bg-slate-200">
-                          {booking.status}
-                        </span>
-                        <p className="text-sm text-slate-500 mt-1">
-                          ${booking.total_amount}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <h3 className="font-semibold text-slate-900">Bookings</h3>
+            <p className="text-sm text-slate-500 mt-1">
+              Manage all bookings
+            </p>
           </div>
+        </Link>
 
-          {/* Pending Hostels */}
-          <div className="bg-white shadow-sm rounded-xl">
-            <div className="flex justify-between items-center p-5 border-b">
-              <h2 className="font-semibold text-slate-900">
-                Pending Approvals
-              </h2>
-              <Link to="/admin/hostels">
-                <button className="text-sm text-indigo-600 hover:underline flex items-center gap-1">
-                  Manage <ArrowRight className="w-4 h-4" />
-                </button>
-              </Link>
+        {/* Hostels */}
+        <Link to="/admin/hostels">
+          <div className="bg-white shadow-sm rounded-xl p-6 hover:shadow-md transition cursor-pointer">
+            <div className="flex items-center justify-between mb-4">
+              <Building2 className="w-6 h-6 text-emerald-600" />
+              <ArrowRight className="w-5 h-5 text-slate-400" />
             </div>
-
-            <div className="p-5">
-              {pendingHostels === 0 ? (
-                <div className="text-center py-8 text-slate-500">
-                  <CheckCircle className="w-12 h-12 mx-auto mb-3 text-emerald-300" />
-                  <p>All hostels approved</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {stats.hostels
-                    .filter((h) => h.status === "pending")
-                    .slice(0, 5)
-                    .map((hostel) => (
-                      <div
-                        key={hostel.id}
-                        className="flex items-center gap-4 bg-slate-50 p-3 rounded-lg"
-                      >
-                        <div className="w-12 h-12 bg-slate-200 rounded-lg flex items-center justify-center overflow-hidden">
-                          {hostel.images?.[0] ? (
-                            <img
-                              src={hostel.images[0]}
-                              alt={hostel.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <Building2 className="w-5 h-5 text-slate-400" />
-                          )}
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">
-                            {hostel.name}
-                          </p>
-                          <p className="text-sm text-slate-500">
-                            {hostel.landlord_name}
-                          </p>
-                        </div>
-
-                        <span className="flex items-center text-xs px-2 py-1 rounded bg-amber-100 text-amber-800">
-                          <Clock className="w-3 h-3 mr-1" />
-                          Pending
-                        </span>
-                      </div>
-                    ))}
-                </div>
-              )}
-            </div>
+            <h3 className="font-semibold text-slate-900">Hostels</h3>
+            <p className="text-sm text-slate-500 mt-1">
+              View and manage hostels
+            </p>
           </div>
+        </Link>
 
-            {/* Maintenance Requests */}
-            <div className="bg-white shadow-sm rounded-xl">
-              <div className="flex justify-between items-center p-5 border-b">
-                <h2 className="font-semibold text-slate-900 flex items-center gap-2">
-                  <Toolbox className="w-5 h-5 text-indigo-500" />
-                  Maintenance Requests
-                </h2>
-
-                <Link to="/admin/maintenance">
-                  <button className="text-sm text-indigo-600 hover:underline flex items-center gap-1">
-                    View All <ArrowRight className="w-4 h-4" />
-                  </button>
-                </Link>
-              </div>
-
-              <div className="p-5">
-                {stats.maintenance.length === 0 ? (
-                  <div className="text-center py-8 text-slate-500">
-                    <Toolbox className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-                    <p>No maintenance requests</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {stats.maintenance.slice(0, 5).map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex justify-between items-center bg-slate-50 p-3 rounded-lg"
-                      >
-                        <div>
-                          <p className="font-medium text-slate-900">
-                            {item.hostel_name}
-                          </p>
-                          <p className="text-sm text-slate-500">
-                            Room {item.room_number}
-                          </p>
-                        </div>
-
-                        <span className="text-xs px-2 py-1 rounded bg-indigo-100 text-indigo-700">
-                          {item.status}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+        {/* Maintenance */}
+        <Link to="/admin/maintenance">
+          <div className="bg-white shadow-sm rounded-xl p-6 hover:shadow-md transition cursor-pointer">
+            <div className="flex items-center justify-between mb-4">
+              <Toolbox className="w-6 h-6 text-amber-600" />
+              <ArrowRight className="w-5 h-5 text-slate-400" />
             </div>
+            <h3 className="font-semibold text-slate-900">Maintenance</h3>
+            <p className="text-sm text-slate-500 mt-1">
+              Handle maintenance requests
+            </p>
+          </div>
+        </Link>
 
-            {/* Recent Reviews */}
-            <div className="bg-white shadow-sm rounded-xl">
-              <div className="flex justify-between items-center p-5 border-b">
-                <h2 className="font-semibold text-slate-900 flex items-center gap-2">
-                  <PenLine className="w-5 h-5 text-purple-500" />
-                  Recent Reviews
-                </h2>
-
-                <Link to="/admin/reviews">
-                  <button className="text-sm text-indigo-600 hover:underline flex items-center gap-1">
-                    View All <ArrowRight className="w-4 h-4" />
-                  </button>
-                </Link>
-              </div>
-
-              <div className="p-5">
-                {stats.reviews.length === 0 ? (
-                  <div className="text-center py-8 text-slate-500">
-                    <PenLine className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-                    <p>No reviews yet</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {stats.reviews.slice(0, 5).map((review) => (
-                      <div
-                        key={review.id}
-                        className="flex justify-between items-center bg-slate-50 p-3 rounded-lg"
-                      >
-                        <div>
-                          <p className="font-medium text-slate-900">
-                            {review.hostel_name}
-                          </p>
-                          <p className="text-sm text-slate-500">
-                            Rating
-                          </p>
-                        </div>
-
-                        <span className="text-sm font-semibold text-yellow-500">
-                          {review.rating}/5
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+        {/* Reviews */}
+        <Link to="/admin/review">
+          <div className="bg-white shadow-sm rounded-xl p-6 hover:shadow-md transition cursor-pointer">
+            <div className="flex items-center justify-between mb-4">
+              <PenLine className="w-6 h-6 text-purple-600" />
+              <ArrowRight className="w-5 h-5 text-slate-400" />
             </div>
+            <h3 className="font-semibold text-slate-900">Reviews</h3>
+            <p className="text-sm text-slate-500 mt-1">
+              View user feedback
+            </p>
+          </div>
+        </Link>
 
-        </div>
+      </div>
     </div>
   );
 }
