@@ -10,7 +10,7 @@ import { useState, useEffect } from "react";
 
 const LandlordDashboard = () => {
   const navigate = useNavigate();
-    const [firstName, setFirstName] = useState("Landlord");
+    const [firstName, setFirstName] = useState("landlord");
     const [landlordId, setLandlordId] = useState<number | null>(null);
   
 

@@ -27,6 +27,7 @@ import LandlordDashboard from "./Dashboard/LandlordDashboard/LandlordDasboard";
 import ViewHostel from "./Dashboard/LandlordDashboard/hostels/ViewHostel";
 import ViewBookings from "./Dashboard/LandlordDashboard/bookings/ViewBookings";
 import ViewReview from "./Dashboard/LandlordDashboard/review/ViewReview";
+import ProtectedRoute from "./ProtectedRoute";
 
 function App() {
   return (
@@ -40,7 +41,11 @@ function App() {
           <Route path='/register' element={<Register/>} />
           <Route path='/profile' element={<Profile/>} />
           <Route path='/messages' element={<Message />} />
-          <Route path='/admin' element={<AdminLayout />} >
+          <Route path='/admin' element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <AdminLayout />
+            </ProtectedRoute>
+          }>
           <Route index element={<AdminDashboard />} />
             <Route path='dashboard' element={<AdminDashboard />} />
             <Route path='users' element={<Users />} />
@@ -50,7 +55,11 @@ function App() {
             <Route path='maintenance' element={<Maintenance />} />
             <Route path='review' element={<Review />} />
           </Route>
-          <Route path='/dashboard' element={<UserLayout />}>
+          <Route path='/dashboard' element={
+            <ProtectedRoute allowedRoles={["student"]}>
+              <UserLayout />
+            </ProtectedRoute>
+          }>
           <Route index element={<UserDashboard />} />
           <Route path='dashboard' element={<UserDashboard />} />
           <Route path='bookings' element={<UserBooking />} />
@@ -59,7 +68,9 @@ function App() {
           <Route path='reviews' element={<UserReview />} />
           <Route path='payments' element={<UserPayment />} />
           </Route>
-          <Route path='/landlord' element={<LandlordLayout />} >
+          <Route path='/landlord' element={<ProtectedRoute allowedRoles={['landlord']}>
+          <LandlordLayout />
+          </ProtectedRoute> } >
           <Route index element={<LandlordDashboard />} />
           <Route path='dashboard' element={<LandlordDashboard />} />
           <Route path='hostels' element={<ViewHostel />} />

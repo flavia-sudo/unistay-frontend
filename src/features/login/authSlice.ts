@@ -8,7 +8,7 @@ interface User {
   email: string;
   password: string;
   phoneNumber: string | null;
-  role: "admin" | "student" | "Landlord";
+  role: "admin" | "student" | "landlord";
   createdAt: string;
   updatedAt: string;
   image_URL: string;
@@ -26,7 +26,7 @@ interface AuthState {
 }
 
 const getStoredUser = (): User | null => {
-  const roles: User["role"][] = ["student", "Landlord", "admin"];
+  const roles: User["role"][] = ["student", "landlord", "admin"];
   for (const role of roles) {
     const stored = localStorage.getItem(role);
     if (stored) {
@@ -50,8 +50,11 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     login(state, action: PayloadAction<User>) {
-      state.user = action.payload;
-      state.token = action.payload.token;
+      ["student", "landlord", "admin", "Landlord"].forEach(r => localStorage.removeItem(r));
+
+      const user = { ...action.payload, role: action.payload.role.toLowerCase() as User["role"] };
+      state.user = user;
+      state.token = user.token;
 
       // Store user under their role
       localStorage.setItem(action.payload.role, JSON.stringify(action.payload));

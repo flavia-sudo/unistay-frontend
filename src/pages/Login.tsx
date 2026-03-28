@@ -53,6 +53,15 @@ const Login = () => {
       // Persist login
       localStorage.setItem("User", JSON.stringify(userData));
 
+      const role = user.role?.toLowerCase();
+      if (role === "admin") {
+        navigate("/admin");
+      } else if (role === "landlord") {
+        navigate("/landlord");
+      } else {
+        navigate("/dashboard");
+      }
+
       // Clear form & navigate
       setEmail("");
       setPassword("");
