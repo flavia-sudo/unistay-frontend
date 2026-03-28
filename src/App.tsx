@@ -24,6 +24,9 @@ import UserReview from "./Dashboard/UserDashboard/reviews/UserReview";
 import UserPayment from "./Dashboard/UserDashboard/payments/ViewPayment";
 import LandlordLayout from "./Dashboard/LandlordDashboard/LandlordLayout";
 import LandlordDashboard from "./Dashboard/LandlordDashboard/LandlordDasboard";
+import ViewHostel from "./Dashboard/LandlordDashboard/hostels/ViewHostel";
+import ViewBookings from "./Dashboard/LandlordDashboard/bookings/ViewBookings";
+import ViewReview from "./Dashboard/LandlordDashboard/review/ViewReview";
 
 function App() {
   return (
@@ -59,6 +62,9 @@ function App() {
           <Route path='/landlord' element={<LandlordLayout />} >
           <Route index element={<LandlordDashboard />} />
           <Route path='dashboard' element={<LandlordDashboard />} />
+          <Route path='hostels' element={<ViewHostel />} />
+          <Route path='bookings' element={<ViewBookings />} />
+          <Route path='review' element={<ViewReview />} />
           </Route>
           <Route path="*" element={<NotFound/>} />
         </Routes>
