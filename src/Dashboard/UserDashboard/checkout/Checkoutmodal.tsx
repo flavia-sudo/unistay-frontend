@@ -23,7 +23,7 @@ type Room = {
   price: string;
   capacity: string;
   description: string;
-  status: boolean; // false = available
+  status: boolean; // true = available
 };
 
 type Hostel = {
@@ -65,11 +65,12 @@ async function fetchRooms(hostelId: number): Promise<Room[]> {
 
   try {
     const json = JSON.parse(text);
-    return Array.isArray(json) ? json : json.data ?? [];
+  return Array.isArray(json) ? json : [];
   } catch {
     return [];
   }
 }
+
 
 async function createBooking(payload: object) {
   const res = await fetch(`${BASE_URL}/booking`, {
@@ -179,7 +180,8 @@ export default function CheckoutModal({ hostel, onClose }: CheckoutModalProps) {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
   const [successData, setSuccessData] = useState<{ bookingId: number; paymentId: number } | null>(null);
-
+const getNumericPrice = (price: string) =>
+  Number(price.replace(/\D/g, ""));
   // Get userId from localStorage (adjust key to match your auth setup)
   const userId = Number(localStorage.getItem("userId") ?? 1);
 
@@ -190,9 +192,9 @@ export default function CheckoutModal({ hostel, onClose }: CheckoutModalProps) {
       .finally(() => setLoadingRooms(false));
   }, [hostel.hostelId]);
 
-  const totalAmount = selectedRoom
-    ? Number(selectedRoom.price) * duration.months
-    : hostel.price * duration.months;
+ const totalAmount = selectedRoom
+  ? getNumericPrice(selectedRoom.price) * duration.months
+  : hostel.price * duration.months;
 
   // ── Validate phone ──────────────────────────────────────────────────────────
   function validatePhone(raw: string) {
@@ -309,14 +311,14 @@ export default function CheckoutModal({ hostel, onClose }: CheckoutModalProps) {
                 <div className="flex items-center gap-2 text-red-500 text-sm bg-red-50 rounded-xl p-3">
                   <AlertCircle size={16} /> {roomsError}
                 </div>
-              ) : rooms.filter((r) => !r.status).length === 0 ? (
+              ) : rooms.filter((r) => r.status === true).length === 0 ? (
                 <p className="text-center text-gray-400 py-8 text-sm">
                   No available rooms at the moment.
                 </p>
               ) : (
                 <div className="space-y-3">
                   {rooms
-                    .filter((r) => !r.status) // status false = available
+                    .filter((r) => r.status === true) // status true = available
                     .map((room) => (
                       <button
                         key={room.roomId}
@@ -349,7 +351,7 @@ export default function CheckoutModal({ hostel, onClose }: CheckoutModalProps) {
                           </div>
                           <div className="text-right">
                             <p className="font-bold text-blue-700 text-sm">
-                              Ksh {Number(room.price).toLocaleString()}
+                             Ksh {getNumericPrice(room.price).toLocaleString()}
                             </p>
                             <p className="text-xs text-gray-400">/month</p>
                           </div>
@@ -440,7 +442,7 @@ export default function CheckoutModal({ hostel, onClose }: CheckoutModalProps) {
               <div className="bg-gray-50 rounded-2xl p-4 mb-5 space-y-2 text-sm">
                 <div className="flex justify-between text-gray-500">
                   <span>Room rate</span>
-                  <span>Ksh {Number(selectedRoom.price).toLocaleString()} × {duration.months} mo.</span>
+                  <span>Ksh {getNumericPrice(selectedRoom.price).toLocaleString()}× {duration.months} mo.</span>
                 </div>
                 <div className="h-px bg-gray-200" />
                 <div className="flex justify-between font-bold text-gray-900 text-base">

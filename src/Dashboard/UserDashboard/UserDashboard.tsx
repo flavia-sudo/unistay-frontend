@@ -1,4 +1,4 @@
-import { Search, Calendar, MessageSquare, Building2, ChevronRight, Wrench } from "lucide-react";
+import { Search, Calendar, Building2, ChevronRight, Wrench } from "lucide-react";
 import { MdWavingHand } from "react-icons/md"
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -6,10 +6,6 @@ import { hostelsAPI, type THostel } from "../../features/hostelAPI";
 import { roomsAPI, type TRoom } from "../../features/roomAPI";
 import { bookingsAPI, type TBooking } from "../../features/bookingAPI";
 import { paymentsAPI, type TPayment } from "../../features/paymentAPI";
-
-type User = {
-  firstName?: string;
-};
 
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -47,7 +43,7 @@ const UserDashboard = () => {
   const totalBookings = bookings.length;
 
   return (
-    <div className="flex-1 min-h-screen bg-slate-50 pb-10">
+    <div className="flex-1 min-h-screen bg-slate-50 p-6">
 
       {/* HEADER */}
       <div className="bg-linear-to-r from-indigo-600 to-purple-600 text-white px-8 py-12 w-full rounded-3xl">
@@ -133,26 +129,6 @@ const UserDashboard = () => {
                 </div>
 
                 <p className="font-medium">All My Bookings</p>
-
-              </div>
-
-              <ChevronRight className="text-gray-400" />
-
-            </div>
-
-            {/* Messages */}
-            <div
-              onClick={() => navigate("/messages")}
-              className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-3 rounded-lg"
-            >
-
-              <div className="flex items-center gap-4">
-
-                <div className="bg-purple-100 p-3 rounded-lg">
-                  <MessageSquare className="text-purple-600" size={22} />
-                </div>
-
-                <p className="font-medium">Messages</p>
 
               </div>
 

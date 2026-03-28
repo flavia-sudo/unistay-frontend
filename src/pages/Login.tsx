@@ -33,7 +33,7 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        "https://medical-backend-v1wz.onrender.com/auth/login",
+        "https://hostel-backend-fyy3.onrender.com/auth/login",
         { email, password }
       );
 

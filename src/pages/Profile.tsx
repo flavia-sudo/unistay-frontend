@@ -17,8 +17,16 @@ const Profile = () => {
 
   const navigate = useNavigate();
 
-  const fullName = `${user.firstname || ""} ${user.lastname || ""}`;
-  const initials = `${user.firstname?.[0] || ""}${user.lastname?.[0] || ""}`.toUpperCase();
+  const fullName = `${user.firstName || ""} ${user.lastName || ""}`;
+  const getInitials = (firstName?: string, lastName?: string) => {
+  const first = firstName?.trim()?.[0] || "";
+  const last = lastName?.trim()?.[0] || "";
+  return (first + last).toUpperCase() || "NA";
+};
+
+const initials = getInitials(user.firstName, user.lastName);
+
+console.log(user);
 
   const roleMap: Record<string, string> = {
     admin: "Admin",
