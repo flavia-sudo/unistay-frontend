@@ -11,7 +11,7 @@ type TReviewWithRelations = TReview & {
 };
 
 const UserReview = () => {
-  const userString = localStorage.getItem("Student");
+  const userString = localStorage.getItem("student");
   const user = userString ? JSON.parse(userString) : null;
   const userId = user?.userId;
 

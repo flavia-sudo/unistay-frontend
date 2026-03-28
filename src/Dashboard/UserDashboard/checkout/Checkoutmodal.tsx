@@ -23,7 +23,7 @@ type Room = {
   price: string;
   capacity: string;
   description: string;
-  status: boolean; // true = available
+  status: boolean;
 };
 
 type Hostel = {
@@ -44,7 +44,10 @@ type CheckoutModalProps = {
 
 type Step = "rooms" | "details" | "payment" | "success";
 
-// ─── Duration options ──────────────────────────────────────────────────────────
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+/** Price stored in DB is always the full semester (4-month) price */
+const SEMESTER_MONTHS = 4;
 
 const DURATIONS = [
   { label: "1 Month", months: 1 },
@@ -56,21 +59,22 @@ const DURATIONS = [
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "https://hostel-backend-fyy3.onrender.com";
 
+/** Stored price is the full semester price → divide by 4 to get monthly rate */
+const getMonthlyRate = (semesterPrice: string | number) =>
+  Math.round(Number(String(semesterPrice).replace(/\D/g, "")) / SEMESTER_MONTHS);
+
 async function fetchRooms(hostelId: number): Promise<Room[]> {
   const res = await fetch(`${BASE_URL}/room/hostel/${hostelId}`);
   if (!res.ok) throw new Error("Failed to load rooms");
-
   const text = await res.text();
-  if (!text || text.trim() === "") return []; // empty body = no rooms yet
-
+  if (!text.trim()) return [];
   try {
     const json = JSON.parse(text);
-  return Array.isArray(json) ? json : [];
+    return Array.isArray(json) ? json : [];
   } catch {
     return [];
   }
 }
-
 
 async function createBooking(payload: object) {
   const res = await fetch(`${BASE_URL}/booking`, {
@@ -80,7 +84,7 @@ async function createBooking(payload: object) {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? "Failed to create booking");
+    throw new Error((err as any).message ?? "Failed to create booking");
   }
   return res.json();
 }
@@ -93,20 +97,20 @@ async function createPayment(payload: object) {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? "Failed to create payment record");
+    throw new Error((err as any).message ?? "Failed to create payment record");
   }
   return res.json();
 }
 
 async function triggerStkPush(phoneNumber: string, amount: number, paymentId: number) {
-  const res = await fetch(`${BASE_URL}/mpesa/stk-push`, {
+  const res = await fetch(`${BASE_URL}/api/mpesa/stk-push`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ phoneNumber, amount, paymentId }),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.message ?? "STK push failed");
+    throw new Error((err as any).message ?? "STK push failed");
   }
   return res.json();
 }
@@ -173,17 +177,22 @@ export default function CheckoutModal({ hostel, onClose }: CheckoutModalProps) {
 
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [checkInDate, setCheckInDate] = useState("");
-  const [duration, setDuration] = useState(DURATIONS[1]);
+  const [duration, setDuration] = useState(DURATIONS[1]); // default: semester
   const [phoneNumber, setPhoneNumber] = useState("");
   const [phoneError, setPhoneError] = useState("");
 
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
   const [successData, setSuccessData] = useState<{ bookingId: number; paymentId: number } | null>(null);
-const getNumericPrice = (price: string) =>
-  Number(price.replace(/\D/g, ""));
-  // Get userId from localStorage (adjust key to match your auth setup)
+
   const userId = Number(localStorage.getItem("userId") ?? 1);
+
+  // Derive monthly rate from stored semester price, then multiply by chosen months
+  const monthlyRate = selectedRoom
+    ? getMonthlyRate(selectedRoom.price)
+    : getMonthlyRate(hostel.price);
+
+  const totalAmount = monthlyRate * duration.months;
 
   useEffect(() => {
     fetchRooms(hostel.hostelId)
@@ -192,20 +201,13 @@ const getNumericPrice = (price: string) =>
       .finally(() => setLoadingRooms(false));
   }, [hostel.hostelId]);
 
- const totalAmount = selectedRoom
-  ? getNumericPrice(selectedRoom.price) * duration.months
-  : hostel.price * duration.months;
-
-  // ── Validate phone ──────────────────────────────────────────────────────────
   function validatePhone(raw: string) {
     const cleaned = raw.replace(/\D/g, "");
-    // Accept 07xxxxxxxx → 2547xxxxxxxx, or already 2547xxxxxxxx
     if (/^07\d{8}$/.test(cleaned)) return "254" + cleaned.slice(1);
     if (/^2547\d{8}$/.test(cleaned)) return cleaned;
     return null;
   }
 
-  // ── Submit ──────────────────────────────────────────────────────────────────
   async function handlePay() {
     setError("");
     const normalizedPhone = validatePhone(phoneNumber);
@@ -220,8 +222,7 @@ const getNumericPrice = (price: string) =>
     setProcessing(true);
 
     try {
-      // 1. Create booking
-      const bookingPayload = {
+      const bookingRes = await createBooking({
         hostelId: hostel.hostelId,
         roomId: selectedRoom!.roomId,
         userId,
@@ -229,23 +230,19 @@ const getNumericPrice = (price: string) =>
         duration: duration.label,
         totalAmount: String(totalAmount),
         bookingStatus: false,
-      };
-      const bookingRes = await createBooking(bookingPayload);
+      });
       const bookingId: number = bookingRes.data?.bookingId ?? bookingRes.bookingId;
 
-      // 2. Create payment record (Pending)
-      const paymentPayload = {
+      const paymentRes = await createPayment({
         bookingId,
         userId,
         amount: String(totalAmount),
         method: "M-Pesa",
         transactionId: `PENDING_${Date.now()}`,
         paymentStatus: "Pending",
-      };
-      const paymentRes = await createPayment(paymentPayload);
+      });
       const paymentId: number = paymentRes.data?.paymentId ?? paymentRes.paymentId;
 
-      // 3. Trigger STK Push
       await triggerStkPush(normalizedPhone, totalAmount, paymentId);
 
       setSuccessData({ bookingId, paymentId });
@@ -257,25 +254,17 @@ const getNumericPrice = (price: string) =>
     }
   }
 
-  // ── Render ──────────────────────────────────────────────────────────────────
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
       <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
-        
+
         {/* Header */}
         <div className="sticky top-0 bg-white z-10 px-6 pt-6 pb-4 border-b border-gray-100">
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition"
-          >
+          <button onClick={onClose} className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition">
             <X size={18} className="text-gray-500" />
           </button>
 
@@ -284,9 +273,7 @@ const getNumericPrice = (price: string) =>
               <Building2 size={18} className="text-white" />
             </div>
             <div>
-              <h2 className="font-bold text-gray-900 text-lg leading-tight">
-                {hostel.hostelName}
-              </h2>
+              <h2 className="font-bold text-gray-900 text-lg leading-tight">{hostel.hostelName}</h2>
               <p className="text-xs text-gray-400 flex items-center gap-1">
                 <MapPin size={11} /> {hostel.location}
               </p>
@@ -298,7 +285,7 @@ const getNumericPrice = (price: string) =>
 
         <div className="px-6 py-5">
 
-          {/* ── STEP 1: Room Selection ────────────────────────────────────── */}
+          {/* ── STEP 1: Room Selection ── */}
           {step === "rooms" && (
             <div>
               <h3 className="font-semibold text-gray-800 mb-4">Choose a Room</h3>
@@ -312,14 +299,12 @@ const getNumericPrice = (price: string) =>
                   <AlertCircle size={16} /> {roomsError}
                 </div>
               ) : rooms.filter((r) => r.status === true).length === 0 ? (
-                <p className="text-center text-gray-400 py-8 text-sm">
-                  No available rooms at the moment.
-                </p>
+                <p className="text-center text-gray-400 py-8 text-sm">No available rooms at the moment.</p>
               ) : (
                 <div className="space-y-3">
-                  {rooms
-                    .filter((r) => r.status === true) // status true = available
-                    .map((room) => (
+                  {rooms.filter((r) => r.status === true).map((room) => {
+                    const roomMonthlyRate = getMonthlyRate(room.price);
+                    return (
                       <button
                         key={room.roomId}
                         onClick={() => setSelectedRoom(room)}
@@ -331,38 +316,30 @@ const getNumericPrice = (price: string) =>
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-3">
-                            <div
-                              className={`w-8 h-8 rounded-xl flex items-center justify-center ${
-                                selectedRoom?.roomId === room.roomId
-                                  ? "bg-blue-500 text-white"
-                                  : "bg-white text-gray-400"
-                              }`}
-                            >
+                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                              selectedRoom?.roomId === room.roomId ? "bg-blue-500 text-white" : "bg-white text-gray-400"
+                            }`}>
                               <BedDouble size={16} />
                             </div>
                             <div>
-                              <p className="font-semibold text-gray-800 text-sm">
-                                Room {room.roomNumber}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {room.roomType} · Capacity: {room.capacity}
-                              </p>
+                              <p className="font-semibold text-gray-800 text-sm">Room {room.roomNumber}</p>
+                              <p className="text-xs text-gray-500">{room.roomType} · Capacity: {room.capacity}</p>
                             </div>
                           </div>
                           <div className="text-right">
+                            {/* Show monthly rate (semester price ÷ 4) */}
                             <p className="font-bold text-blue-700 text-sm">
-                             Ksh {getNumericPrice(room.price).toLocaleString()}
+                              Ksh {roomMonthlyRate.toLocaleString()}
                             </p>
                             <p className="text-xs text-gray-400">/month</p>
                           </div>
                         </div>
                         {room.description && (
-                          <p className="text-xs text-gray-400 mt-2 ml-11 line-clamp-2">
-                            {room.description}
-                          </p>
+                          <p className="text-xs text-gray-400 mt-2 ml-11 line-clamp-2">{room.description}</p>
                         )}
                       </button>
-                    ))}
+                    );
+                  })}
                 </div>
               )}
 
@@ -376,7 +353,7 @@ const getNumericPrice = (price: string) =>
             </div>
           )}
 
-          {/* ── STEP 2: Booking Details ───────────────────────────────────── */}
+          {/* ── STEP 2: Booking Details ── */}
           {step === "details" && selectedRoom && (
             <div>
               <h3 className="font-semibold text-gray-800 mb-4">Booking Details</h3>
@@ -388,16 +365,11 @@ const getNumericPrice = (price: string) =>
                     <BedDouble size={16} className="text-white" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-800 text-sm">
-                      Room {selectedRoom.roomNumber}
-                    </p>
+                    <p className="font-semibold text-gray-800 text-sm">Room {selectedRoom.roomNumber}</p>
                     <p className="text-xs text-gray-500">{selectedRoom.roomType}</p>
                   </div>
                 </div>
-                <button
-                  onClick={() => setStep("rooms")}
-                  className="text-xs text-blue-500 font-medium hover:underline"
-                >
+                <button onClick={() => setStep("rooms")} className="text-xs text-blue-500 font-medium hover:underline">
                   Change
                 </button>
               </div>
@@ -418,9 +390,7 @@ const getNumericPrice = (price: string) =>
 
               {/* Duration */}
               <label className="block mb-5">
-                <span className="text-sm font-medium text-gray-700 mb-1.5 block">
-                  Duration
-                </span>
+                <span className="text-sm font-medium text-gray-700 mb-1.5 block">Duration</span>
                 <div className="grid grid-cols-3 gap-2">
                   {DURATIONS.map((d) => (
                     <button
@@ -441,8 +411,8 @@ const getNumericPrice = (price: string) =>
               {/* Cost summary */}
               <div className="bg-gray-50 rounded-2xl p-4 mb-5 space-y-2 text-sm">
                 <div className="flex justify-between text-gray-500">
-                  <span>Room rate</span>
-                  <span>Ksh {getNumericPrice(selectedRoom.price).toLocaleString()}× {duration.months} mo.</span>
+                  <span>Monthly rate</span>
+                  <span>Ksh {monthlyRate.toLocaleString()} × {duration.months} mo.</span>
                 </div>
                 <div className="h-px bg-gray-200" />
                 <div className="flex justify-between font-bold text-gray-900 text-base">
@@ -492,9 +462,7 @@ const getNumericPrice = (price: string) =>
                 </div>
                 <div className="border-t border-blue-500 pt-3 flex justify-between items-end">
                   <span className="text-sm text-blue-200">Amount due</span>
-                  <span className="text-3xl font-black">
-                    Ksh {totalAmount.toLocaleString()}
-                  </span>
+                  <span className="text-3xl font-black">Ksh {totalAmount.toLocaleString()}</span>
                 </div>
               </div>
 
@@ -511,14 +479,9 @@ const getNumericPrice = (price: string) =>
                     type="tel"
                     placeholder="7XXXXXXXX"
                     value={phoneNumber.replace(/^(0|\+?254)/, "")}
-                    onChange={(e) => {
-                      setPhoneError("");
-                      setPhoneNumber(e.target.value);
-                    }}
+                    onChange={(e) => { setPhoneError(""); setPhoneNumber(e.target.value); }}
                     className={`w-full border rounded-xl pl-14 pr-4 py-3 text-sm outline-none transition focus:ring-2 ${
-                      phoneError
-                        ? "border-red-400 focus:ring-red-200"
-                        : "border-gray-200 focus:ring-blue-500"
+                      phoneError ? "border-red-400 focus:ring-red-200" : "border-gray-200 focus:ring-blue-500"
                     }`}
                   />
                 </div>
@@ -531,9 +494,7 @@ const getNumericPrice = (price: string) =>
 
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-700 flex gap-2 mb-5">
                 <AlertCircle size={14} className="shrink-0 mt-0.5" />
-                <span>
-                  A payment prompt will appear on your phone. Enter your M-Pesa PIN to complete the transaction.
-                </span>
+                <span>A payment prompt will appear on your phone. Enter your M-Pesa PIN to complete the transaction.</span>
               </div>
 
               {error && (
@@ -548,35 +509,26 @@ const getNumericPrice = (price: string) =>
                 className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-200 disabled:text-gray-400 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 transition text-base"
               >
                 {processing ? (
-                  <>
-                    <Loader2 className="animate-spin" size={18} /> Sending prompt…
-                  </>
+                  <><Loader2 className="animate-spin" size={18} /> Sending prompt…</>
                 ) : (
-                  <>
-                    <CreditCard size={18} /> Pay Ksh {totalAmount.toLocaleString()}
-                  </>
+                  <><CreditCard size={18} /> Pay Ksh {totalAmount.toLocaleString()}</>
                 )}
               </button>
 
-              <button
-                onClick={() => setStep("details")}
-                className="w-full mt-2 py-3 text-gray-400 text-sm hover:text-gray-600 transition"
-              >
+              <button onClick={() => setStep("details")} className="w-full mt-2 py-3 text-gray-400 text-sm hover:text-gray-600 transition">
                 ← Back
               </button>
             </div>
           )}
 
-          {/* ── STEP 4: Success ───────────────────────────────────────────── */}
+          {/* ── STEP 4: Success ── */}
           {step === "success" && (
             <div className="text-center py-4">
               <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5 animate-in zoom-in-50 duration-500">
                 <CheckCircle2 size={40} className="text-emerald-500" />
               </div>
 
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                Booking Initiated!
-              </h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Booking Initiated!</h3>
               <p className="text-sm text-gray-500 mb-6">
                 Check your phone and enter your M-Pesa PIN to complete the payment.
                 Your booking will be confirmed automatically.
@@ -598,15 +550,15 @@ const getNumericPrice = (price: string) =>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Room</span>
-                    <span className="font-semibold text-gray-800">
-                      {selectedRoom?.roomNumber}
-                    </span>
+                    <span className="font-semibold text-gray-800">{selectedRoom?.roomNumber}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Duration</span>
+                    <span className="font-semibold text-gray-800">{duration.label}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Amount</span>
-                    <span className="font-bold text-emerald-600">
-                      Ksh {totalAmount.toLocaleString()}
-                    </span>
+                    <span className="font-bold text-emerald-600">Ksh {totalAmount.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Status</span>
@@ -620,14 +572,12 @@ const getNumericPrice = (price: string) =>
                 Payment status updates automatically via M-Pesa callback
               </div>
 
-              <button
-                onClick={onClose}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-2xl font-semibold transition"
-              >
+              <button onClick={onClose} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-2xl font-semibold transition">
                 Done
               </button>
             </div>
           )}
+
         </div>
       </div>
     </div>

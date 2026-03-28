@@ -1,69 +1,52 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import { ArrowLeft } from "lucide-react";
+import { logout } from "../features/login/authSlice";
+import type { RootState } from "../app/store";
 
 const Profile = () => {
-  const user = JSON.parse(localStorage.getItem("User") || "{}");
-  const token = localStorage.getItem("Token");
+  const user = useSelector((state: RootState) => state.auth.user);
+  const token = useSelector((state: RootState) => state.auth.token);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: user.firstname || "",
-    lastName: user.lastname || "",
-    email: user.email || "",
-    phoneNumber: user.contactPhone || "",
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.email || "",
+    phoneNumber: user?.phoneNumber || "",
   });
 
-  const navigate = useNavigate();
-
-  const fullName = `${user.firstName || ""} ${user.lastName || ""}`;
   const getInitials = (firstName?: string, lastName?: string) => {
-  const first = firstName?.trim()?.[0] || "";
-  const last = lastName?.trim()?.[0] || "";
-  return (first + last).toUpperCase() || "NA";
-};
-
-const initials = getInitials(user.firstName, user.lastName);
-
-console.log(user);
-
-  const roleMap: Record<string, string> = {
-    admin: "Admin",
-    student: "Student",
-    landlord: "Landlord",
+    const first = firstName?.trim()?.[0] || "";
+    const last = lastName?.trim()?.[0] || "";
+    return (first + last).toUpperCase() || "NA";
   };
-  const accountType = roleMap[user.role?.toLowerCase()] || "N/A";
 
-  const verified = user.verified ? "Yes" : "No";
+  const fullName = `${user?.firstName || ""} ${user?.lastName || ""}`.trim();
+  const initials = getInitials(user?.firstName, user?.lastName);
+  const roleMap: Record<string, string> = { admin: "Admin", student: "Student", landlord: "Landlord" };
+  const accountType = roleMap[user?.role?.toLowerCase() ?? ""] || "N/A";
+  const verified = user?.verified ? "Yes" : "No";
 
   useEffect(() => {
-    if (!token || !user.userId) {
-      setShowLoginModal(true);
-    }
+    if (!token || !user?.userId) setShowLoginModal(true);
   }, [token, user]);
 
   const handleDeleteAccount = async () => {
     try {
       const response = await fetch(
-        `https://hostel-backend-fyy3.onrender.com/users/delete/${user.userId}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        `https://hostel-backend-fyy3.onrender.com/users/delete/${user?.userId}`,
+        { method: "DELETE", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` } }
       );
-
       if (!response.ok) throw new Error("Failed to delete account");
 
-      const data = await response.json();
-      if (data.error) throw new Error(data.error);
-
       alert("Account deleted successfully.");
-      localStorage.removeItem("User");
-      localStorage.removeItem("Token");
+      dispatch(logout()); // slice cleans up localStorage
       setShowDeleteModal(false);
       navigate("/login");
     } catch (error) {
@@ -72,30 +55,24 @@ console.log(user);
     }
   };
 
-  const handleEditProfile = () => setShowEditModal(true);
-
   const handleUpdateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const response = await fetch(
-        `https://hostel-backend-fyy3.onrender.com/users/update/${user.userId}`,
+        `https://hostel-backend-fyy3.onrender.com/users/update/${user?.userId}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify(formData),
         }
       );
-
       if (!response.ok) throw new Error("Failed to update account");
 
+      // Re-login with updated data so Redux + localStorage stay in sync
       const updatedUser = await response.json();
-      localStorage.setItem("User", JSON.stringify(updatedUser));
+      dispatch({ type: "auth/login", payload: { ...updatedUser, token } });
       setShowEditModal(false);
       alert("Profile updated successfully.");
-      window.location.reload();
     } catch (error) {
       console.error("Error updating profile:", error);
       alert("Failed to update profile. Please try again.");
@@ -112,10 +89,7 @@ console.log(user);
         <div className="w-full max-w-sm p-6 text-center bg-white rounded-md shadow-md">
           <h2 className="mb-4 text-xl font-semibold text-purple-700">Login Required</h2>
           <p className="mb-6 text-gray-700">You must be logged in to view your profile.</p>
-          <button
-            onClick={() => navigate("/login")}
-            className="px-6 py-2 text-white transition bg-purple-600 rounded hover:bg-purple-700"
-          >
+          <button onClick={() => navigate("/login")} className="px-6 py-2 text-white bg-purple-600 rounded hover:bg-purple-700">
             OK
           </button>
         </div>
@@ -125,10 +99,7 @@ console.log(user);
 
   return (
     <div className="relative max-w-4xl p-6 mx-auto mt-24 bg-white shadow-lg rounded-xl">
-      <button
-        onClick={() => navigate("/")}
-        className="absolute flex items-center gap-2 text-purple-700 transition-colors cursor-pointer top-4 left-4 hover:text-purple-900"
-      >
+      <button onClick={() => navigate(-1)} className="absolute flex items-center gap-2 text-purple-700 transition-colors cursor-pointer top-4 left-4 hover:text-purple-900">
         <ArrowLeft size={20} />
         <span className="text-sm font-medium">Back</span>
       </button>
@@ -138,112 +109,50 @@ console.log(user);
           {initials}
         </div>
         <h2 className="text-2xl font-bold text-purple-700">{fullName}</h2>
-        <p className="text-gray-500">{user.email}</p>
+        <p className="text-gray-500">{user?.email}</p>
       </div>
 
       <div className="grid w-full grid-cols-1 gap-6 mb-8 sm:grid-cols-2">
-        <ProfileField label="Phone Number" value={user.phoneNumber || "N/A"} />
-        <ProfileField label="Address" value={user.address || "N/A"} />
+        <ProfileField label="Phone Number" value={user?.phoneNumber || "N/A"} />
+        <ProfileField label="Address" value={user?.address || "N/A"} />
         <ProfileField label="Account Type" value={accountType} />
         <ProfileField label="Verified" value={verified} />
       </div>
 
       <div className="flex flex-col justify-center gap-4 sm:flex-row">
-        <button
-          onClick={handleEditProfile}
-          className="px-6 py-2 font-semibold text-white transition bg-yellow-500 rounded-md cursor-pointer hover:bg-yellow-600"
-        >
+        <button onClick={() => setShowEditModal(true)} className="px-6 py-2 font-semibold text-white bg-yellow-500 rounded-md hover:bg-yellow-600">
           Edit Profile
         </button>
-        <button
-          onClick={() => setShowDeleteModal(true)}
-          className="px-6 py-2 font-semibold text-white transition bg-red-600 rounded-md cursor-pointer hover:bg-red-700"
-        >
+        <button onClick={() => setShowDeleteModal(true)} className="px-6 py-2 font-semibold text-white bg-red-600 rounded-md hover:bg-red-700">
           Delete Account
         </button>
       </div>
 
-      {/* Delete Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
           <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
             <h3 className="mb-4 text-xl font-bold text-red-600">Confirm Account Deletion</h3>
-            <p className="mb-6 text-gray-700">
-              Are you sure you want to delete your account? This action cannot be undone.
-            </p>
+            <p className="mb-6 text-gray-700">Are you sure you want to delete your account? This action cannot be undone.</p>
             <div className="flex justify-end gap-4">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 text-gray-700 transition border rounded cursor-pointer hover:border-purple-600"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDeleteAccount}
-                className="px-4 py-2 text-white transition bg-red-600 rounded cursor-pointer hover:bg-red-700"
-              >
-                Confirm Delete
-              </button>
+              <button onClick={() => setShowDeleteModal(false)} className="px-4 py-2 text-gray-700 border rounded hover:border-purple-600">Cancel</button>
+              <button onClick={handleDeleteAccount} className="px-4 py-2 text-white bg-red-600 rounded hover:bg-red-700">Confirm Delete</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Edit Modal */}
       {showEditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
           <div className="w-full max-w-lg p-6 bg-white rounded-lg shadow-lg">
             <h3 className="mb-4 text-xl font-bold text-purple-700">Edit Profile</h3>
             <form onSubmit={handleUpdateSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <input
-                type="text"
-                name="firstName"
-                placeholder="First Name"
-                value={formData.firstName}
-                onChange={handleChange}
-                className="p-2 text-gray-700 border rounded"
-                required
-              />
-              <input
-                type="text"
-                name="lastName"
-                placeholder="Last Name"
-                value={formData.lastName}
-                onChange={handleChange}
-                className="p-2 text-gray-700 border rounded"
-                required
-              />
-              <input
-                type="email"
-                name="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={handleChange}
-                className="col-span-2 p-2 text-gray-700 border rounded"
-                required
-              />
-              <input
-                type="text"
-                name="phoneNumber"
-                placeholder="Phone Number"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                className="p-2 text-gray-700 border rounded"
-              />
+              <input type="text" name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleChange} className="p-2 text-gray-700 border rounded" required />
+              <input type="text" name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleChange} className="p-2 text-gray-700 border rounded" required />
+              <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} className="col-span-2 p-2 text-gray-700 border rounded" required />
+              <input type="text" name="phoneNumber" placeholder="Phone Number" value={formData.phoneNumber} onChange={handleChange} className="p-2 text-gray-700 border rounded" />
               <div className="flex justify-end col-span-2 gap-4 mt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 text-gray-700 border rounded hover:border-purple-600"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-white bg-yellow-500 rounded hover:bg-yellow-600"
-                >
-                  Save Changes
-                </button>
+                <button type="button" onClick={() => setShowEditModal(false)} className="px-4 py-2 text-gray-700 border rounded hover:border-purple-600">Cancel</button>
+                <button type="submit" className="px-4 py-2 text-white bg-yellow-500 rounded hover:bg-yellow-600">Save Changes</button>
               </div>
             </form>
           </div>

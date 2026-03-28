@@ -41,6 +41,7 @@ function App() {
           <Route path='/register' element={<Register/>} />
           <Route path='/profile' element={<Profile/>} />
           <Route path='/messages' element={<Message />} />
+          <Route path='/hostels' element={<Hostels />} />
           <Route path='/admin' element={
             <ProtectedRoute allowedRoles={["admin"]}>
               <AdminLayout />

@@ -1,248 +1,252 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { paymentsAPI, type TPayment } from "../../../features/paymentAPI";
-import { useMemo } from "react";
-import { Search, Download } from "lucide-react";
+import { Search, Download, Loader2, CreditCard } from "lucide-react";
 import jsPDF from "jspdf";
 
+// This type represents the joined data returned by your backend queries
 type TPaymentWithRelations = TPayment & {
-    firstName?: string;
-    lastName?: string;
-    hostelName?: string;
-    roomNumber?: string;
+  firstName?: string;
+  lastName?: string;
+  hostelName?: string;
+  roomNumber?: string;
+  transactionId?: string; // From PaymentTable
 };
 
 const UserPayment = () => {
-    const storedUser = localStorage.getItem("Student");
-    const user = storedUser ? JSON.parse(storedUser) : null;
-    const userId = user?.userId;
+  const storedUser = localStorage.getItem("student");
+  const user = storedUser ? JSON.parse(storedUser) : null;
+  const userId = user?.userId;
 
-    const { data: paymentsData,
-        isLoading: paymentsLoading,
-        error: paymentsError,
-    } = paymentsAPI.useGetPaymentByUserIdQuery(userId!, {
-        skip: !userId,
-        refetchOnMountOrArgChange: true,
-        pollingInterval: 50000,
+  const { data: paymentsData, isLoading, error } =
+    paymentsAPI.useGetPaymentByUserIdQuery(userId, {
+      skip: !userId,
+      refetchOnMountOrArgChange: true,
+      pollingInterval: 50000,
     });
-    const payments: TPaymentWithRelations[] = paymentsData?. data ?? [];
 
-    const [search, setSearch] = useState("");
-    const [statusFilter, setStatusFilter] = useState<"all" | "confirmed" | "pending">("all");
+  const payments: TPaymentWithRelations[] = paymentsData?.data ?? [];
 
-    const filteredPayments = useMemo(() => {
-        return payments.filter((payment) => {
-            const searchLower = search.toLowerCase();
-            const matchesSearch =
-                payment.firstName?.toLowerCase().includes(searchLower) ||
-                payment.lastName?.toLowerCase().includes(searchLower) ||
-                payment.hostelName?.toLowerCase().includes(searchLower) ||
-                payment.roomNumber?.toLowerCase().includes(searchLower);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] =
+    useState<"all" | "Confirmed" | "Cancelled" | "Pending">("all");
 
-            const matchesStatus =
-                statusFilter === "all" ||
-                (statusFilter === "confirmed" && payment.paymentStatus === true) ||
-                (statusFilter === "pending" && payment.paymentStatus === false);
+  /* ---------------- FILTER LOGIC ---------------- */
+  const filteredPayments = useMemo(() => {
+    return payments.filter((payment) => {
+      const searchLower = search.toLowerCase();
+      const matchesSearch =
+        payment.hostelName?.toLowerCase().includes(searchLower) ||
+        payment.roomNumber?.toLowerCase().includes(searchLower) ||
+        payment.transactionId?.toLowerCase().includes(searchLower);
 
-            return matchesSearch && matchesStatus;
-        });
-    }, [payments, search, statusFilter]);
+      const matchesStatus =
+        statusFilter === "all" || payment.paymentStatus === statusFilter;
 
-    const total = payments.length;
-    const confirmedPayments = payments.filter((payment) => payment.paymentStatus === true).length;
-    const pendingPayments = payments.filter((payment) => payment.paymentStatus === false).length;
-    const revenue = payments.reduce((acc, payment) => acc + payment.amount, 0);
+      return matchesSearch && matchesStatus;
+    });
+  }, [payments, search, statusFilter]);
 
-    const downloadReceipt = (payment: TPaymentWithRelations) => {
-        const doc = new jsPDF();
-        doc.setFontSize(18);
-        doc.text("Payment Receipt", 20, 20);
+  /* ---------------- STATS CALCULATION ---------------- */
+  const confirmedPaymentsList = payments.filter((p) => p.paymentStatus === "Confirmed");
+  const pendingPaymentsList = payments.filter((p) => p.paymentStatus === "Pending");
 
-        doc.setFontSize(12);
-        doc.text(`Name: ${payment.firstName} ${payment.lastName}`, 20, 40);
-        doc.text(`Hostel: ${payment.hostelName}`, 20, 50);
-        doc.text(`Room: ${payment.roomNumber}`, 20, 60);
-        doc.text(`Amount: Ksh ${payment.amount}`, 20, 70);
-        doc.text(`Method: ${payment.method}`, 20, 80);
-        doc.text(
-            `Status: ${payment.paymentStatus ? "Confirmed" : "Pending"}`,
-            20,
-            90
-        );
+  const total = payments.length;
+  const confirmedCount = confirmedPaymentsList.length;
+  const pendingCount = pendingPaymentsList.length;
 
-        doc.save("payment_receipt.pdf");
-    };
+  // Revenue based on Confirmed status
+  const totalPaidAmount = confirmedPaymentsList.reduce(
+    (acc, payment) => acc + Number(payment.amount || 0),
+    0
+  );
 
-    return (
-    <div className="p-6 min-h-screen bg-slate-50">
+  /* ---------------- PDF GENERATION ---------------- */
+  const downloadReceipt = (payment: TPaymentWithRelations) => {
+    const doc = new jsPDF();
+    const date = new Date(payment.createdAt).toLocaleDateString();
+
+    doc.setFontSize(20);
+    doc.setTextColor(30, 58, 138); // Dark Blue
+    doc.text("OFFICIAL PAYMENT RECEIPT", 105, 20, { align: "center" });
+
+    doc.setDrawColor(200, 200, 200);
+    doc.line(20, 25, 190, 25);
+
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Receipt ID: REC-${payment.paymentId}`, 20, 40);
+    doc.text(`Transaction Ref: ${payment.transactionId ?? "N/A"}`, 20, 50);
+    doc.text(`Date: ${date}`, 20, 60);
+
+    doc.setFontSize(14);
+    doc.text("Student Details:", 20, 75);
+    doc.setFontSize(12);
+    doc.text(`Name: ${payment.firstName ?? ""} ${payment.lastName ?? ""}`, 30, 85);
+
+    doc.setFontSize(14);
+    doc.text("Accommodation Details:", 20, 100);
+    doc.setFontSize(12);
+    doc.text(`Hostel: ${payment.hostelName ?? "N/A"}`, 30, 110);
+    doc.text(`Room Number: ${payment.roomNumber ?? "N/A"}`, 30, 120);
+
+    doc.setFontSize(14);
+    doc.text("Payment Summary:", 20, 135);
+    doc.setFontSize(12);
+    doc.text(`Method: ${payment.method}`, 30, 145);
+    doc.text(`Status: ${payment.paymentStatus}`, 30, 155);
+
+    doc.setFontSize(16);
+    doc.text(`Total Amount: Ksh ${Number(payment.amount).toLocaleString()}`, 20, 175);
+
+    doc.save(`Receipt_${payment.transactionId || payment.paymentId}.pdf`);
+  };
+
+  return (
+    <div className="p-6 min-h-screen bg-slate-50 text-slate-900">
       <div className="max-w-7xl mx-auto">
 
-        {/* Header */}
-        <div className="mb-8 bg-linear-to-r from-blue-500 via-blue-600 to-blue-700 text-white px-8 py-12 w-full rounded-3xl">
-          <h1 className="text-4xl font-bold text-slate-900">
-            My Payments
-          </h1>
-          <p className="text-slate-700 mt-5">
-            View and download your payment history
-          </p>
+        {/* HEADER */}
+        <div className="mb-8 bg-blue-700 text-white px-8 py-10 rounded-3xl shadow-xl flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">Payment History</h1>
+            <p className="mt-2 text-blue-100">Manage your hostel fees and download receipts</p>
+          </div>
+          <CreditCard size={48} className="opacity-20 hidden md:block" />
         </div>
 
-        {/* Stats */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {/* STATS CARDS */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <StatCard title="Total Invoices" value={total} color="text-slate-700" />
+          <StatCard title="Confirmed" value={confirmedCount} color="text-emerald-600" />
+          <StatCard title="Pending" value={pendingCount} color="text-amber-600" />
           <StatCard
-            title="Total"
-            value={total}
+            title="Total Paid (Ksh)"
+            value={totalPaidAmount.toLocaleString()}
             color="text-blue-600"
-            bgColor="bg-blue-100"
-          />
-          <StatCard
-            title="Confirmed"
-            value={confirmedPayments}
-            color="text-emerald-600"
-            bgColor="bg-emerald-100"
-          />
-          <StatCard
-            title="Pending"
-            value={pendingPayments}
-            color="text-rose-600"
-            bgColor="bg-rose-100"
-          />
-          <StatCard
-            title="Paid"
-            value={`Ksh ${revenue.toLocaleString()}`}
-            color="text-sky-600"
-            bgColor="bg-sky-100"
           />
         </div>
 
-        {/* Search */}
-        <div className="bg-white rounded-2xl shadow-sm p-4 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="relative w-full md:w-2/3">
-            <Search className="absolute left-3 top-3.5 w-4 h-4 text-slate-400" />
+        {/* SEARCH & FILTERS */}
+        <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
             <input
               type="text"
-              placeholder="Search hostel or room..."
+              placeholder="Search by Hostel, Room, or Transaction ID..."
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-100 focus:ring-2 focus:ring-blue-500 bg-slate-50 outline-none"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
             />
           </div>
-
           <select
+            className="px-4 py-3 rounded-xl border border-slate-100 bg-slate-50 outline-none min-w-45"
             value={statusFilter}
-            onChange={(e) =>
-              setStatusFilter(
-                e.target.value as "all" | "confirmed" | "pending"
-              )
-            }
-            className="w-full md:w-48 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
+            onChange={(e) => setStatusFilter(e.target.value as any)}
           >
-            <option value="all">All Status</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="pending">Pending</option>
+            <option value="all">All Statuses</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Pending">Pending</option>
+            <option value="Cancelled">Cancelled</option>
           </select>
         </div>
-        
-        {/* Table */}
-        {paymentsLoading && <p className="text-center text-slate-500">Loading payments...</p>}
-        {paymentsError && <p className="text-red-600">Error loading payments</p>}
-        
-        {payments.length > 0 ? (
-        <div className="bg-white rounded-2xl shadow-sm p-6">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="text-slate-500 text-sm border-b">
-                  <th className="pb-3">Hostel</th>
-                  <th className="pb-3">Room</th>
-                  <th className="pb-3">Amount</th>
-                  <th className="pb-3">Method</th>
-                  <th className="pb-3">Status</th>
-                  <th className="pb-3">Download</th>
-                </tr>
-              </thead>
 
-              <tbody>
-                {filteredPayments.map((payment) => (
-                  <tr
-                    key={payment.paymentId}
-                    className="border-b last:border-none"
-                  >
-                    <td className="py-4 text-slate-600">
-                      {payment.hostelName}
-                    </td>
+        {/* LOADING & ERROR */}
+        {isLoading && (
+          <div className="flex justify-center py-20">
+            <Loader2 className="animate-spin text-blue-600" size={40} />
+          </div>
+        )}
 
-                    <td className="py-4 text-slate-600">
-                      {payment.roomNumber}
-                    </td>
+        {error && (
+          <div className="bg-red-50 text-red-600 p-4 rounded-xl text-center border border-red-100">
+            Failed to fetch payment data.
+          </div>
+        )}
 
-                    <td className="py-4 text-slate-600">
-                      Ksh {Number(payment.amount).toLocaleString()}
-                    </td>
-
-                    <td className="py-4 text-slate-600">
-                      {payment.method}
-                    </td>
-
-                    <td className="py-4">
-                      <StatusBadge status={payment.paymentStatus} />
-                    </td>
-
-                    <td className="py-4">
-                      <button
-                        onClick={() => downloadReceipt(payment)}
-                        className="p-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600"
-                      >
-                        <Download size={16} />
-                      </button>
-                    </td>
+        {/* DATA TABLE */}
+        {!isLoading && filteredPayments.length > 0 ? (
+          <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-200">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 text-slate-500 text-sm uppercase tracking-wider">
+                    <th className="px-6 py-4 font-semibold">Transaction ID</th>
+                    <th className="px-6 py-4 font-semibold">Hostel</th>
+                    <th className="px-6 py-4 font-semibold">Room Number</th>
+                    <th className="px-6 py-4 font-semibold">Method</th>
+                    <th className="px-6 py-4 font-semibold">Amount</th>
+                    <th className="px-6 py-4 font-semibold">Status</th>
+                    <th className="px-6 py-4 font-semibold text-center">Receipt</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-        </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredPayments.map((payment) => (
+                    <tr key={payment.paymentId} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-4 font-mono text-xs text-slate-500">
+                        {payment.transactionId}
+                      </td>
+                      <td className="px-6 py-4 text-slate-800 font-medium">
+                        {payment.hostelName}
+                      </td>
+                      <td className="px-6 py-4 text-slate-600">
+                        {payment.roomNumber}
+                      </td>
+                      <td className="px-6 py-4 text-slate-600 text-sm">
+                        {payment.method}
+                      </td>
+                      <td className="px-6 py-4 font-bold text-slate-900">
+                        Ksh {Number(payment.amount).toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <StatusBadge status={payment.paymentStatus} />
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <button
+                          onClick={() => downloadReceipt(payment)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        >
+                          <Download size={20} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         ) : (
-            !paymentsLoading && (<p className="text-center text-slate-500 text-base">No payments found</p>
-        )
-    )}
+          !isLoading && (
+            <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-300">
+              <p className="text-slate-500">No payment records found.</p>
+            </div>
+          )
+        )}
+      </div>
     </div>
-    </div>
-    );
+  );
 };
 
-export default UserPayment;
+/* ---------------- SUB-COMPONENTS ---------------- */
 
-/* ---------------- Reusable Components ---------------- */
-
-const StatCard = ({
-  title,
-  value,
-  color = "text-slate-900",
-  bgColor = "bg-white",
-}: {
-  title: string;
-  value: string | number;
-  color?: string;
-  bgColor?: string;
-}) => (
-  <div className={`rounded-2xl shadow-sm p-6 ${bgColor}`}>
-    <p className="text-slate-500 text-sm">{title}</p>
-    <p className={`text-2xl font-bold mt-2 ${color}`}>
-      {value}
-    </p>
+const StatCard = ({ title, value, color }: { title: string; value: string | number; color: string }) => (
+  <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+    <p className="text-sm font-medium text-slate-500 mb-1">{title}</p>
+    <p className={`text-2xl font-bold ${color}`}>{value}</p>
   </div>
 );
 
-const StatusBadge = ({ status }: { status: boolean }) => {
-  const label = status ? "Confirmed" : "Pending";
-
-  const styles = status
-    ? "bg-emerald-100 text-emerald-700"
-    : "bg-red-100 text-red-700";
+const StatusBadge = ({ status }: { status: TPayment["paymentStatus"] }) => {
+  const styles = {
+    Confirmed: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    Pending: "bg-amber-50 text-amber-700 border-amber-200",
+    Cancelled: "bg-red-50 text-red-700 border-red-200",
+  };
 
   return (
-    <span
-      className={`px-3 py-1 rounded-full text-xs font-medium ${styles}`}
-    >
-      {label}
+    <span className={`px-3 py-1 rounded-full text-xs font-bold border ${styles[status]}`}>
+      {status}
     </span>
   );
 };
+
+export default UserPayment;

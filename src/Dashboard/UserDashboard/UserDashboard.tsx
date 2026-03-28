@@ -17,7 +17,7 @@ const UserDashboard = () => {
   const { data: paymentsData } = paymentsAPI.useGetPaymentsQuery(undefined);
 
   useEffect(() => {
-  const storedUser = localStorage.getItem("Student");
+  const storedUser = localStorage.getItem("student");
   console.log("Raw stored user:", storedUser);
 
   if (storedUser) {
@@ -39,7 +39,7 @@ const UserDashboard = () => {
   const payments: TPayment[] = paymentsData?.data || [];
 
   const activeBookings = bookings.filter(b => b.bookingStatus === true).length;
-  const pendingPayments = payments.filter(p => p.paymentStatus === false).length;
+  const pendingPayments = payments.filter(p => p.paymentStatus === "Pending").length;
   const totalBookings = bookings.length;
 
   return (

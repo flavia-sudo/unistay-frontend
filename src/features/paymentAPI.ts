@@ -7,7 +7,7 @@ export type TPayment = {
     userId: number;
     amount: number;
     method: string;
-    paymentStatus: boolean;
+    paymentStatus: "Pending" | "Confirmed" | "Cancelled";
     createdAt: Date;
     updatedAt: Date;
 }

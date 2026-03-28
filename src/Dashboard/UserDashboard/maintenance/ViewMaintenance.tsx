@@ -9,7 +9,7 @@ type TMaintenanceWithRelations = TMaintenance & {
 };
 
 const UserMaintenance = () => {
-  const storedUser = localStorage.getItem("Student");
+  const storedUser = localStorage.getItem("student");
   const user = storedUser ? JSON.parse(storedUser) : null;
   const userId = user?.userId;
   console.log("User object:", user);

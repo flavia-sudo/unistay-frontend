@@ -9,7 +9,7 @@ type TBookingWithRelations = TBooking & {
 };
 
 const UserBooking = () => {
-    const userString = localStorage.getItem("Student");
+    const userString = localStorage.getItem("student");
     const user = userString ? JSON.parse(userString) : null;
     const userId = user?.userId;
     const { data: bookingData, isLoading } = bookingsAPI.useGetBookingByUserIdQuery(userId, {
@@ -100,7 +100,7 @@ const UserBooking = () => {
                                         {booking.roomNumber}
                                         </td>
                                         <td className="py-4 font-semibold">
-                                        ${Number(booking.totalAmount).toLocaleString()}
+                                        Ksh {Number(booking.totalAmount).toLocaleString()}
                                         </td>
                                         <td className="py-4">
                                         <StatusBadge status={booking.bookingStatus} />

@@ -69,7 +69,7 @@ const LandlordDashboard = () => {
   const availableRooms = landlordRooms.filter((r) => r.status === true).length;
   const pendingBookings = landlordBookings.filter((b) => b.bookingStatus === false).length;
   const totalRevenue = landlordPayments
-    .filter((p) => p.paymentStatus === true)
+    .filter((p) => p.paymentStatus === "Confirmed")
     .reduce((sum, p) => sum + Number(p.amount), 0);
 
   return (
