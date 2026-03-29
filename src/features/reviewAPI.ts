@@ -11,26 +11,28 @@ export type TReview = {
     updatedAt: Date;
 }
 
+const getToken = () => {
+    try {
+        const stored = localStorage.getItem("auth_user");
+        return stored ? JSON.parse(stored).token : null;
+    } catch { return null; }
+};
+
 export const reviewsAPI = createApi({
     reducerPath: "reviewsAPI",
-    baseQuery: fetchBaseQuery({ baseUrl: ApiDomain,
+    baseQuery: fetchBaseQuery({
+        baseUrl: ApiDomain,
         prepareHeaders: (headers) => {
-            const token = localStorage.getItem("Token");
-            if (token) {
-                headers.set("Authorization", `Bearer ${token}`);
-            }
+            const token = getToken();
+            if (token) headers.set("Authorization", `Bearer ${token}`);
             headers.set('Content-Type', 'application/json');
             return headers;
         }
-     }),
+    }),
     tagTypes: ['Review'],
     endpoints: (builder) => ({
         createReview: builder.mutation<TReview, Partial<TReview>>({
-            query: (newReview) => ({
-                url: "/review",
-                method: "POST",
-                body: newReview,
-            }),
+            query: (newReview) => ({ url: "/review", method: "POST", body: newReview }),
             invalidatesTags: ['Review'],
         }),
         getReviews: builder.query<{ data: TReview[] }, void>({
@@ -45,6 +47,7 @@ export const reviewsAPI = createApi({
         }),
         getReviewByUserId: builder.query<{ data: TReview[] }, number>({
             query: (userId) => `/review/user/${userId}`,
+            providesTags: ['Review'],
         }),
         updateReview: builder.mutation<TReview, Partial<TReview> & { reviewId: number }>({
             query: (updatedReview) => ({
@@ -55,10 +58,7 @@ export const reviewsAPI = createApi({
             invalidatesTags: ['Review'],
         }),
         deleteReview: builder.mutation<void, number>({
-            query: (reviewId) => ({
-                url: `/review/${reviewId}`,
-                method: "DELETE",
-            }),
+            query: (reviewId) => ({ url: `/review/${reviewId}`, method: "DELETE" }),
             invalidatesTags: ['Review'],
         }),
     }),

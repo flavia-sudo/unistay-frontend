@@ -5,7 +5,7 @@ export type TRoom = {
     roomId: number;
     hostelId: number;
     userId: number;
-    roomNumber: number;
+    roomNumber: string;
     roomType: string;
     price: string;
     capacity: string;
@@ -13,26 +13,28 @@ export type TRoom = {
     status: boolean | string | number;
 }
 
+const getToken = () => {
+    try {
+        const stored = localStorage.getItem("auth_user");
+        return stored ? JSON.parse(stored).token : null;
+    } catch { return null; }
+};
+
 export const roomsAPI = createApi({
     reducerPath: "roomsAPI",
-    baseQuery: fetchBaseQuery({ baseUrl: ApiDomain,
+    baseQuery: fetchBaseQuery({
+        baseUrl: ApiDomain,
         prepareHeaders: (headers) => {
-            const token = localStorage.getItem("Token");
-            if (token) {
-                headers.set("Authorization", `Bearer ${token}`);
-            }
+            const token = getToken();
+            if (token) headers.set("Authorization", `Bearer ${token}`);
             headers.set('Content-Type', 'application/json');
             return headers;
         }
-     }),
-     tagTypes: ['Rooms'],
-     endpoints: (builder) => ({
+    }),
+    tagTypes: ['Rooms'],
+    endpoints: (builder) => ({
         createRoom: builder.mutation<TRoom, Partial<TRoom>>({
-            query: (newRoom) => ({
-                url: "/room",
-                method: "POST",
-                body: newRoom,
-            }),
+            query: (newRoom) => ({ url: "/room", method: "POST", body: newRoom }),
             invalidatesTags: ['Rooms'],
         }),
         getRooms: builder.query<{ data: TRoom[] }, void>({
@@ -54,11 +56,8 @@ export const roomsAPI = createApi({
             invalidatesTags: ['Rooms'],
         }),
         deleteRoom: builder.mutation<void, number>({
-            query: (roomId) => ({
-                url: `/room/${roomId}`,
-                method: "DELETE",
-            }),
+            query: (roomId) => ({ url: `/room/${roomId}`, method: "DELETE" }),
             invalidatesTags: ['Rooms'],
         }),
-     }),
-})
+    }),
+});

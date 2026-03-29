@@ -10,45 +10,36 @@ import { useState, useEffect } from "react";
 
 const LandlordDashboard = () => {
   const navigate = useNavigate();
-    const [firstName, setFirstName] = useState("landlord");
-    const [landlordId, setLandlordId] = useState<number | null>(null);
-  
+  const [firstName, setFirstName] = useState("landlord");
+  const [landlordId, setLandlordId] = useState<number | null>(null);
 
   const { data: hostelsData } = hostelsAPI.useGetHostelsQuery(undefined);
   const { data: roomsData } = roomsAPI.useGetRoomsQuery(undefined);
   const { data: bookingsData } = bookingsAPI.useGetBookingsQuery(undefined);
   const { data: paymentsData } = paymentsAPI.useGetPaymentsQuery(undefined);
 
-   useEffect(() => {
+  useEffect(() => {
     const storedLandlord = localStorage.getItem("landlord");
-    console.log("Raw stored landlord:", storedLandlord);
-  
     if (storedLandlord) {
       try {
-        const parsedLandlord = JSON.parse(storedLandlord);
-        console.log("Parsed user:", parsedLandlord);
-        if (parsedLandlord.firstName && typeof parsedLandlord.firstName === "string") {
-          setFirstName(parsedLandlord.firstName);
-        }
-        if (parsedLandlord.landlordId && typeof parsedLandlord.landlordId === "number") {
-          setLandlordId(parsedLandlord.landlordId);
-        } else if (parsedLandlord.landlordId && typeof parsedLandlord.landlordId === "string") {
-          setLandlordId(parsedLandlord.landlordId);
-        }
+        const parsed = JSON.parse(storedLandlord);
+        if (parsed.firstName) setFirstName(parsed.firstName);
+        // userId is the landlord's ID — schema uses userId on HostelTable
+        if (parsed.userId) setLandlordId(Number(parsed.userId));
       } catch (error) {
-        console.error("Error parsing user data:", error);
+        console.error("Error parsing landlord data:", error);
       }
     }
   }, []);
 
-  const hostels: THostel [] = hostelsData?.data || [];
+  const hostels: THostel[] = hostelsData?.data || [];
   const rooms: TRoom[] = roomsData?.data || [];
   const bookings: TBooking[] = bookingsData?.data || [];
   const payments: TPayment[] = paymentsData?.data || [];
 
-    /* FILTER LANDLORD DATA */
+  /* FILTER LANDLORD DATA */
   const landlordHostels = landlordId
-    ? hostels.filter((h) => h.landlordId === landlordId)
+    ? hostels.filter((h) => h.userId === landlordId)
     : [];
 
   const landlordRooms = landlordHostels.length > 0
@@ -69,7 +60,7 @@ const LandlordDashboard = () => {
   const availableRooms = landlordRooms.filter((r) => r.status === true).length;
   const pendingBookings = landlordBookings.filter((b) => b.bookingStatus === false).length;
   const totalRevenue = landlordPayments
-    .filter((p) => p.paymentStatus === "Confirmed")
+    .filter((p) => p.paymentStatus === "Completed")  
     .reduce((sum, p) => sum + Number(p.amount), 0);
 
   return (
@@ -78,22 +69,18 @@ const LandlordDashboard = () => {
       {/* HEADER */}
       <div className="bg-linear-to-r from-green-600 to-teal-700 text-white px-10 py-14 rounded-3xl shadow">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          
           <div>
             <p className="uppercase text-green-100 font-semibold mb-2">
               Landlord Portal
             </p>
-
             <h1 className="text-4xl font-bold">
               Welcome back, {firstName}
               <MdWavingHand className="inline ml-2 text-yellow-300" />
             </h1>
-
             <p className="text-green-100 mt-2">
               Here's what's happening with your properties
             </p>
           </div>
-
           <button
             onClick={() => navigate("/landlord/hostel")}
             className="bg-white text-green-700 px-6 py-3 rounded-lg font-semibold flex items-center gap-2 shadow hover:bg-gray-100"
@@ -113,11 +100,8 @@ const LandlordDashboard = () => {
           <div className="bg-white p-7 rounded-2xl shadow flex justify-between items-center">
             <div>
               <p className="text-gray-500">Total Properties</p>
-              <h2 className="text-3xl font-bold mt-2">
-                {totalProperties}
-              </h2>
+              <h2 className="text-3xl font-bold mt-2">{totalProperties}</h2>
             </div>
-
             <div className="bg-indigo-100 p-4 rounded-xl">
               <Building2 className="text-indigo-600" />
             </div>
@@ -126,11 +110,8 @@ const LandlordDashboard = () => {
           <div className="bg-white p-7 rounded-2xl shadow flex justify-between items-center">
             <div>
               <p className="text-gray-500">Available Rooms</p>
-              <h2 className="text-3xl font-bold mt-2">
-                {availableRooms}/{totalRooms}
-              </h2>
+              <h2 className="text-3xl font-bold mt-2">{availableRooms}/{totalRooms}</h2>
             </div>
-
             <div className="bg-green-100 p-4 rounded-xl">
               <Users className="text-green-600" />
             </div>
@@ -139,11 +120,8 @@ const LandlordDashboard = () => {
           <div className="bg-white p-7 rounded-2xl shadow flex justify-between items-center">
             <div>
               <p className="text-gray-500">Pending Bookings</p>
-              <h2 className="text-3xl font-bold mt-2">
-                {pendingBookings}
-              </h2>
+              <h2 className="text-3xl font-bold mt-2">{pendingBookings}</h2>
             </div>
-
             <div className="bg-orange-100 p-4 rounded-xl">
               <Calendar className="text-orange-600" />
             </div>
@@ -153,10 +131,9 @@ const LandlordDashboard = () => {
             <div>
               <p className="text-gray-500">Total Revenue</p>
               <h2 className="text-3xl font-bold mt-2">
-                Ksh {totalRevenue}
+                Ksh {totalRevenue.toLocaleString()}
               </h2>
             </div>
-
             <div className="bg-purple-100 p-4 rounded-xl">
               <CreditCard className="text-purple-600" />
             </div>
@@ -166,12 +143,8 @@ const LandlordDashboard = () => {
 
         {/* RECENT BOOKINGS */}
         <div className="bg-white rounded-2xl shadow p-8">
-          
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold">
-              Recent Bookings
-            </h2>
-
+            <h2 className="text-xl font-semibold">Recent Bookings</h2>
             <Link
               to="/landlord/bookings"
               className="flex items-center gap-2 text-slate-600 hover:text-black"
@@ -181,20 +154,30 @@ const LandlordDashboard = () => {
             </Link>
           </div>
 
-          <div className="flex flex-col items-center justify-center py-12 text-slate-400">
-            <Calendar size={40} />
-            <p className="mt-4">No bookings yet</p>
-          </div>
+          {landlordBookings.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-slate-400">
+              <Calendar size={40} />
+              <p className="mt-4">No bookings yet</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {landlordBookings.slice(0, 5).map((b) => (
+                <div key={b.bookingId} className="py-3 flex justify-between text-sm text-slate-700">
+                  <span>Booking #{b.bookingId}</span>
+                  <span>{new Date(b.checkInDate).toLocaleDateString()}</span>
+                  <span className={b.bookingStatus ? "text-green-600" : "text-amber-500"}>
+                    {b.bookingStatus ? "Confirmed" : "Pending"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* MY PROPERTIES */}
         <div className="bg-white rounded-2xl shadow p-8">
-          
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold">
-              My Properties
-            </h2>
-
+            <h2 className="text-xl font-semibold">My Properties</h2>
             <Link
               to="/landlord/hostels"
               className="flex items-center gap-2 text-slate-600 hover:text-black"
@@ -204,10 +187,29 @@ const LandlordDashboard = () => {
             </Link>
           </div>
 
-          <div className="flex flex-col items-center justify-center py-12 text-slate-400">
-            <Building2 size={40} />
-            <p className="mt-4">No properties yet</p>
-          </div>
+          {landlordHostels.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-slate-400">
+              <Building2 size={40} />
+              <p className="mt-4">No properties yet</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {landlordHostels.map((h) => (
+                <div key={h.hostelId} className="border border-slate-200 rounded-xl p-4 flex gap-4 items-center">
+                  <img
+                    src={h.image_URL}
+                    alt={h.hostelName}
+                    className="w-16 h-16 rounded-lg object-cover"
+                  />
+                  <div>
+                    <p className="font-semibold text-slate-800">{h.hostelName}</p>
+                    <p className="text-sm text-slate-500">{h.location}</p>
+                    <p className="text-sm text-green-600 font-medium">Ksh {h.price.toLocaleString()}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
       </div>

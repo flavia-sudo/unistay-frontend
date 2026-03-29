@@ -1,5 +1,4 @@
-import { createApi } from "@reduxjs/toolkit/query/react";
-import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { ApiDomain } from "../utils/APIDomain";
 
 export type TUser = {
@@ -9,7 +8,7 @@ export type TUser = {
     email: string;
     password: string;
     phoneNumber: string | null;
-    role: "admin" | "student" | "Landlord";
+    role: "admin" | "student" | "landlord";
     createdAt: Date;
     updatedAt: Date;
     image_URL: string;
@@ -26,76 +25,63 @@ export type TverifyUser = {
     code: string;
 };
 
+const getToken = () => {
+    try {
+        const stored = localStorage.getItem("auth_user");
+        return stored ? JSON.parse(stored).token : null;
+    } catch { return null; }
+};
+
 export const usersAPI = createApi({
     reducerPath: "usersAPI",
     baseQuery: fetchBaseQuery({
         baseUrl: ApiDomain,
         prepareHeaders: (headers) => {
-            const token = localStorage.getItem("Token");
-            console.log(token);
-            if (token) {
-                headers.set("Authorization", `Bearer ${token}`);
-            }
+            const token = getToken();
+            if (token) headers.set("Authorization", `Bearer ${token}`);
             return headers;
         },
     }),
     tagTypes: ["Users"],
     endpoints: (builder) => ({
         createUsers: builder.mutation<TUser, Partial<TUser>>({
-            query: (newUser) => ({
-                url: "/auth/register",
-                method: "POST",
-                body: newUser,
+            query: (newUser) => ({ url: "/auth/register", method: "POST", body: newUser }),
+            invalidatesTags: ["Users"],
+        }),
+        verifyUser: builder.mutation<TUser, TverifyUser>({
+            query: (data) => ({ url: "/auth/verify", method: "POST", body: data }),
+        }),
+        getUsers: builder.query<{ data: TUser[] }, void>({
+            query: () => "/user_all",
+            providesTags: ["Users"],
+        }),
+        getUserById: builder.query<TUser, number>({
+            query: (userId) => `/user/${userId}`,
+        }),
+        updateUser: builder.mutation<TUser, Partial<TUser> & { userId: number }>({
+            query: (updatedUser) => ({
+                url: `/user/${updatedUser.userId}`,
+                method: "PUT",
+                body: updatedUser,
             }),
             invalidatesTags: ["Users"],
         }),
-
-        verifyUser: builder.mutation<TUser, TverifyUser>({
-      query: (data) => ({
-        url: "/auth/verify",
-        method: "POST",
-        body: data,
-      }),
+        deleteUser: builder.mutation<{ success: boolean; userId: number }, number>({
+            query: (userId) => ({ url: `/users/delete/${userId}`, method: "DELETE" }),
+            invalidatesTags: ["Users"],
+        }),
+        getLandlords: builder.query<{ data: TUser[] }, void>({
+            query: () => "/users/landlords_all",
+            providesTags: ["Users"],
+        }),
     }),
-
-    getUsers: builder.query<{ data: TUser[] }, void>({
-      query: () => "/user_all",
-      providesTags: ["Users"],
-    }),
-
-    getUserById: builder.query<TUser, number>({
-      query: (userId) => `/user/${userId}`,
-    }),
-
-    updateUser: builder.mutation<TUser, Partial<TUser> & { userId: number }>({
-      query: (updatedUser) => ({
-        url: `/user/${updatedUser.userId}`,
-        method: "PUT",
-        body: updatedUser,
-      }),
-      invalidatesTags: ["Users"],
-    }),
-
-    deleteUser: builder.mutation<{ success: boolean; userId: number }, number>({
-      query: (userId) => ({
-        url: `/users/delete/${userId}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["Users"],
-    }),
-
-    getLandlords: builder.query<{ data: TUser[] }, void>({
-      query: () => "/users/landlords_all",
-      providesTags: ["Users"],
-    }),
-  }),
 });
 
 export const {
-  useCreateUsersMutation,
-  useVerifyUserMutation,
-  useGetUsersQuery,
-  useUpdateUserMutation,
-  useGetUserByIdQuery,
-  useGetLandlordsQuery,
+    useCreateUsersMutation,
+    useVerifyUserMutation,
+    useGetUsersQuery,
+    useUpdateUserMutation,
+    useGetUserByIdQuery,
+    useGetLandlordsQuery,
 } = usersAPI;

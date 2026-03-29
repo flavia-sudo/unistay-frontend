@@ -13,26 +13,28 @@ export type TMaintenance = {
     date_resolved: Date;
 }
 
+const getToken = () => {
+    try {
+        const stored = localStorage.getItem("auth_user");
+        return stored ? JSON.parse(stored).token : null;
+    } catch { return null; }
+};
+
 export const maintenanceAPI = createApi({
     reducerPath: "maintenanceAPI",
-    baseQuery: fetchBaseQuery({ baseUrl: ApiDomain,
+    baseQuery: fetchBaseQuery({
+        baseUrl: ApiDomain,
         prepareHeaders: (headers) => {
-            const token = localStorage.getItem("Token");
-            if (token) {
-                headers.set("Authorization", `Bearer ${token}`);
-            }
+            const token = getToken();
+            if (token) headers.set("Authorization", `Bearer ${token}`);
             headers.set('Content-Type', 'application/json');
             return headers;
         }
-     }),
+    }),
     tagTypes: ["Maintenance"],
     endpoints: (builder) => ({
         createMaintenance: builder.mutation<TMaintenance, Partial<TMaintenance>>({
-            query: (newMaintenance) => ({
-                url: "/maintenance",
-                method: "POST",
-                body: newMaintenance,
-            }),
+            query: (newMaintenance) => ({ url: "/maintenance", method: "POST", body: newMaintenance }),
             invalidatesTags: ["Maintenance"],
         }),
         getMaintenances: builder.query<{ data: TMaintenance[] }, void>({
@@ -47,6 +49,7 @@ export const maintenanceAPI = createApi({
         }),
         getMaintenanceByUserId: builder.query<{ data: TMaintenance[] }, number>({
             query: (userId) => `/maintenance/user/${userId}`,
+            providesTags: ["Maintenance"],
         }),
         updateMaintenance: builder.mutation<TMaintenance, Partial<TMaintenance> & { maintenanceId: number }>({
             query: (updatedMaintenance) => ({
@@ -57,10 +60,7 @@ export const maintenanceAPI = createApi({
             invalidatesTags: ["Maintenance"],
         }),
         deleteMaintenance: builder.mutation<void, number>({
-            query: (maintenanceId) => ({
-                url: `/maintenance/${maintenanceId}`,
-                method: "DELETE",
-            }),
+            query: (maintenanceId) => ({ url: `/maintenance/${maintenanceId}`, method: "DELETE" }),
             invalidatesTags: ["Maintenance"],
         }),
     }),

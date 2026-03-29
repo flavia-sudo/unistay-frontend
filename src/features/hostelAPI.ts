@@ -13,26 +13,28 @@ export type THostel = {
     price: number;
 }
 
+const getToken = () => {
+    try {
+        const stored = localStorage.getItem("auth_user");
+        return stored ? JSON.parse(stored).token : null;
+    } catch { return null; }
+};
+
 export const hostelsAPI = createApi({
     reducerPath: "hostelsAPI",
-    baseQuery: fetchBaseQuery({ baseUrl: ApiDomain,
+    baseQuery: fetchBaseQuery({
+        baseUrl: ApiDomain,
         prepareHeaders: (headers) => {
-            const token = localStorage.getItem("Token");
-            if (token) {
-                headers.set("Authorization", `Bearer ${token}`);
-            }
+            const token = getToken();
+            if (token) headers.set("Authorization", `Bearer ${token}`);
             headers.set('Content-Type', 'application/json');
             return headers;
         }
-     }),
-     tagTypes: ['Hostels'],
-     endpoints: (builder) => ({
+    }),
+    tagTypes: ['Hostels'],
+    endpoints: (builder) => ({
         createHostel: builder.mutation<THostel, Partial<THostel>>({
-            query: (newHostel) => ({
-                url: "/hostel",
-                method: "POST",
-                body: newHostel,
-            }),
+            query: (newHostel) => ({ url: "/hostel", method: "POST", body: newHostel }),
             invalidatesTags: ['Hostels'],
         }),
         getHostels: builder.query<{ data: THostel[] }, void>({
@@ -54,11 +56,8 @@ export const hostelsAPI = createApi({
             invalidatesTags: ['Hostels'],
         }),
         deleteHostel: builder.mutation<void, number>({
-            query: (hostelId) => ({
-                url: `/hostel/${hostelId}`,
-                method: "DELETE",
-            }),
+            query: (hostelId) => ({ url: `/hostel/${hostelId}`, method: "DELETE" }),
             invalidatesTags: ['Hostels'],
         }),
-     }),
+    }),
 });
