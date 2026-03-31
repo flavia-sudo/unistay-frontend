@@ -1,66 +1,81 @@
-import { Building2, Users, Calendar, CreditCard, Plus, ArrowRight } from "lucide-react";
+import {
+  Building2,
+  Users,
+  Calendar,
+  CreditCard,
+  Plus,
+  ArrowRight,
+} from "lucide-react";
 import { MdWavingHand } from "react-icons/md";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../app/store";
+
 import { hostelsAPI, type THostel } from "../../features/hostelAPI";
 import { roomsAPI, type TRoom } from "../../features/roomAPI";
 import { bookingsAPI, type TBooking } from "../../features/bookingAPI";
 import { paymentsAPI, type TPayment } from "../../features/paymentAPI";
-import { useState, useEffect } from "react";
 
 const LandlordDashboard = () => {
   const navigate = useNavigate();
-  const [firstName, setFirstName] = useState("landlord");
-  const [landlordId, setLandlordId] = useState<number | null>(null);
 
-  const { data: hostelsData } = hostelsAPI.useGetHostelsQuery(undefined);
-  const { data: roomsData } = roomsAPI.useGetRoomsQuery(undefined);
-  const { data: bookingsData } = bookingsAPI.useGetBookingsQuery(undefined);
-  const { data: paymentsData } = paymentsAPI.useGetPaymentsQuery(undefined);
+  /* ✅ AUTH (same as UserDashboard) */
+  const user = useSelector((state: RootState) => state.auth.user);
+  const firstName = user?.firstName ?? "Landlord";
+  const landlordId = user?.userId;
 
-  useEffect(() => {
-    const storedLandlord = localStorage.getItem("landlord");
-    if (storedLandlord) {
-      try {
-        const parsed = JSON.parse(storedLandlord);
-        if (parsed.firstName) setFirstName(parsed.firstName);
-        // userId is the landlord's ID — schema uses userId on HostelTable
-        if (parsed.userId) setLandlordId(Number(parsed.userId));
-      } catch (error) {
-        console.error("Error parsing landlord data:", error);
-      }
-    }
-  }, []);
+  /* ✅ FETCH DATA */
+  const { data: hostelsData } = hostelsAPI.useGetHostelsQuery();
+  const { data: roomsData } = roomsAPI.useGetRoomsQuery();
+
+  const { data: bookingsData } = bookingsAPI.useGetBookingsQuery(undefined, {
+    skip: !landlordId,
+    refetchOnMountOrArgChange: true,
+  });
+
+  const { data: paymentsData } = paymentsAPI.useGetPaymentsQuery(undefined, {
+    skip: !landlordId,
+    refetchOnMountOrArgChange: true,
+  });
 
   const hostels: THostel[] = hostelsData?.data || [];
   const rooms: TRoom[] = roomsData?.data || [];
   const bookings: TBooking[] = bookingsData?.data || [];
   const payments: TPayment[] = paymentsData?.data || [];
 
-  /* FILTER LANDLORD DATA */
+  /* ✅ FILTER LANDLORD DATA */
   const landlordHostels = landlordId
     ? hostels.filter((h) => h.userId === landlordId)
     : [];
 
-  const landlordRooms = landlordHostels.length > 0
-    ? rooms.filter((r) => landlordHostels.some((h) => h.hostelId === r.hostelId))
+  const landlordRooms = landlordHostels.length
+    ? rooms.filter((r) =>
+        landlordHostels.some((h) => h.hostelId === r.hostelId)
+      )
     : [];
 
-  const landlordBookings = landlordRooms.length > 0
-    ? bookings.filter((b) => landlordRooms.some((r) => r.roomId === b.roomId))
+  const landlordBookings = landlordRooms.length
+    ? bookings.filter((b) =>
+        landlordRooms.some((r) => r.roomId === b.roomId)
+      )
     : [];
 
-  const landlordPayments = landlordBookings.length > 0
-    ? payments.filter((p) => landlordBookings.some((b) => b.bookingId === p.bookingId))
+  const landlordPayments = landlordBookings.length
+    ? payments.filter((p) =>
+        landlordBookings.some((b) => b.bookingId === p.bookingId)
+      )
     : [];
 
-  /* STATS */
+  /* ✅ STATS */
   const totalProperties = landlordHostels.length;
   const totalRooms = landlordRooms.length;
   const availableRooms = landlordRooms.filter((r) => r.status === true).length;
-  const pendingBookings = landlordBookings.filter((b) => b.bookingStatus === false).length;
+  const pendingBookings = landlordBookings.filter(
+    (b) => b.bookingStatus === false
+  ).length;
+
   const totalRevenue = landlordPayments
-    .filter((p) => p.paymentStatus === "Completed")  
+    .filter((p) => p.paymentStatus === "Completed")
     .reduce((sum, p) => sum + Number(p.amount), 0);
 
   return (
@@ -81,6 +96,7 @@ const LandlordDashboard = () => {
               Here's what's happening with your properties
             </p>
           </div>
+
           <button
             onClick={() => navigate("/landlord/hostel")}
             className="bg-white text-green-700 px-6 py-3 rounded-lg font-semibold flex items-center gap-2 shadow hover:bg-gray-100"
@@ -110,7 +126,9 @@ const LandlordDashboard = () => {
           <div className="bg-white p-7 rounded-2xl shadow flex justify-between items-center">
             <div>
               <p className="text-gray-500">Available Rooms</p>
-              <h2 className="text-3xl font-bold mt-2">{availableRooms}/{totalRooms}</h2>
+              <h2 className="text-3xl font-bold mt-2">
+                {availableRooms}/{totalRooms}
+              </h2>
             </div>
             <div className="bg-green-100 p-4 rounded-xl">
               <Users className="text-green-600" />
@@ -155,17 +173,28 @@ const LandlordDashboard = () => {
           </div>
 
           {landlordBookings.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-slate-400">
+            <div className="flex flex-col items-center py-12 text-slate-400">
               <Calendar size={40} />
               <p className="mt-4">No bookings yet</p>
             </div>
           ) : (
             <div className="divide-y divide-slate-100">
               {landlordBookings.slice(0, 5).map((b) => (
-                <div key={b.bookingId} className="py-3 flex justify-between text-sm text-slate-700">
+                <div
+                  key={b.bookingId}
+                  className="py-3 flex justify-between text-sm text-slate-700"
+                >
                   <span>Booking #{b.bookingId}</span>
-                  <span>{new Date(b.checkInDate).toLocaleDateString()}</span>
-                  <span className={b.bookingStatus ? "text-green-600" : "text-amber-500"}>
+                  <span>
+                    {new Date(b.checkInDate).toLocaleDateString()}
+                  </span>
+                  <span
+                    className={
+                      b.bookingStatus
+                        ? "text-green-600"
+                        : "text-amber-500"
+                    }
+                  >
                     {b.bookingStatus ? "Confirmed" : "Pending"}
                   </span>
                 </div>
@@ -188,23 +217,32 @@ const LandlordDashboard = () => {
           </div>
 
           {landlordHostels.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-slate-400">
+            <div className="flex flex-col items-center py-12 text-slate-400">
               <Building2 size={40} />
               <p className="mt-4">No properties yet</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {landlordHostels.map((h) => (
-                <div key={h.hostelId} className="border border-slate-200 rounded-xl p-4 flex gap-4 items-center">
+                <div
+                  key={h.hostelId}
+                  className="border border-slate-200 rounded-xl p-4 flex gap-4 items-center"
+                >
                   <img
                     src={h.image_URL}
                     alt={h.hostelName}
                     className="w-16 h-16 rounded-lg object-cover"
                   />
                   <div>
-                    <p className="font-semibold text-slate-800">{h.hostelName}</p>
-                    <p className="text-sm text-slate-500">{h.location}</p>
-                    <p className="text-sm text-green-600 font-medium">Ksh {h.price.toLocaleString()}</p>
+                    <p className="font-semibold text-slate-800">
+                      {h.hostelName}
+                    </p>
+                    <p className="text-sm text-slate-500">
+                      {h.location}
+                    </p>
+                    <p className="text-sm text-green-600 font-medium">
+                      Ksh {h.price.toLocaleString()}
+                    </p>
                   </div>
                 </div>
               ))}
