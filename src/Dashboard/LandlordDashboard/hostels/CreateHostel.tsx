@@ -13,6 +13,7 @@ type CreateHostelInputs = {
   hostelName: string;
   location: string;
   contact_number: string;
+  rooms_available: number;
   description: string;
   price: number;
   landlordId: number;
@@ -22,6 +23,7 @@ const schema = yup.object({
   hostelName: yup.string().required("Hostel name is required"),
   location: yup.string().required("Location is required"),
   contact_number: yup.string().required("Contact number is required"),
+  rooms_available: yup.number().required("Rooms available is required"),
   description: yup.string().required("Description is required"),
   price: yup.number().required("Price is required"),
   landlordId: yup.number().required(),
@@ -53,6 +55,7 @@ const CreateHostel = ({ hostel }: CreateHostelProps) => {
       setValue("hostelName", hostel.hostelName);
       setValue("location", hostel.location);
       setValue("contact_number", hostel.contact_number);
+      setValue("rooms_available", hostel.rooms_available);
       setValue("description", hostel.description);
       setValue("price", hostel.price);
       setValue("landlordId", hostel.landlordId);
@@ -145,6 +148,21 @@ const CreateHostel = ({ hostel }: CreateHostelProps) => {
             />
             <p className="text-red-500 text-xs">
               {errors.contact_number?.message}
+            </p>
+          </div>
+
+          {/* Rooms Available */}
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Rooms Available
+            </label>
+            <input
+              type="number"
+              {...register("rooms_available")}
+              className="w-full px-3 py-2 border rounded-md"
+            />
+            <p className="text-red-500 text-xs">
+              {errors.rooms_available?.message}
             </p>
           </div>
 

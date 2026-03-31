@@ -14,6 +14,7 @@ type UpdateHostelInputs = {
   hostelName: string;
   location: string;
   contact_number: string;
+  rooms_available: number;
   description: string;
   price: number;
   landlordId: number;
@@ -24,6 +25,7 @@ const schema = yup.object({
   hostelName: yup.string().required(),
   location: yup.string().required(),
   contact_number: yup.string().required(),
+  rooms_available: yup.number().required(),
   description: yup.string().required(),
   price: yup.number().required(),
   landlordId: yup.number().required(),
@@ -49,6 +51,7 @@ const UpdateHostel = ({ hostel }: UpdateHostelProps) => {
       setValue("hostelName", hostel.hostelName);
       setValue("location", hostel.location);
       setValue("contact_number", hostel.contact_number);
+      setValue("rooms_available", hostel.rooms_available);
       setValue("description", hostel.description);
       setValue("price", hostel.price);
       setValue("landlordId", hostel.landlordId);
@@ -129,6 +132,15 @@ const UpdateHostel = ({ hostel }: UpdateHostelProps) => {
             <label className="text-sm">Contact</label>
             <input
               {...register("contact_number")}
+              className="w-full px-3 py-2 border rounded-md"
+            />
+          </div>
+
+          <div>
+            <label className="text-sm">Rooms Available</label>
+            <input
+              type="number"
+              {...register("rooms_available")}
               className="w-full px-3 py-2 border rounded-md"
             />
           </div>

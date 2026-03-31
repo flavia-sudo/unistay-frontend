@@ -5,7 +5,7 @@ import { usersAPI } from "../../../features/userAPI";
 import { toast } from "sonner";
 import { useEffect } from "react";
 
-type UserRole = "admin" | "student" | "Landlord";
+type UserRole = "admin" | "student" | "landlord";
 
 type UpdateProfileInputs = {
   firstName: string;
@@ -18,7 +18,7 @@ const schema = yup.object({
   lastName: yup.string().max(50, "Max 50 characters").required("Last name is required"),
   role: yup
     .mixed<UserRole>()
-    .oneOf(["admin", "student", "Landlord"])
+    .oneOf(["admin", "student", "landlord"])
     .required("Role is required"),
 });
 

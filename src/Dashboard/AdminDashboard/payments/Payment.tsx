@@ -8,6 +8,7 @@ type TPaymentWithRelations = TPayment & {
     lastName?: string
     hostelName?: string
     roomNumber?: string
+    transactionId?: string;
 }
 
 const Payment = () => {
@@ -15,7 +16,7 @@ const Payment = () => {
 
     const payments: TPaymentWithRelations[] = paymentsData?. data ?? [];
     const [search, setSearch] = useState("");
-    const [statusFilter, setStatusFilter] = useState<"all" | "confirmed" | "pending">("all");
+    const [statusFilter, setStatusFilter] = useState<"all" | "Completed" | "Cancelled" | "Pending">("all");
     const [selectedPayment, setSelectedPayment] = useState<TPaymentWithRelations | null>(null);
 
     const filteredPayments = useMemo(() => {
@@ -28,19 +29,17 @@ const Payment = () => {
             payment.roomNumber?.toLowerCase().includes(searchLower);
 
             const matchesStatus = 
-            statusFilter === "all" ||
-            (statusFilter === "confirmed" && payment.paymentStatus === true) ||
-            (statusFilter === "pending" && payment.paymentStatus === false);
+            statusFilter === "all" || (payment.paymentStatus === statusFilter);
 
             return matchesSearch && matchesStatus;
         });
     }, [payments, search, statusFilter]);
 
     const total = payments.length;
-    const confirmedPayments = (payments as TPaymentWithRelations[]).filter((payment) => payment.paymentStatus === true).length;
-    const pendingPayments = (payments as TPaymentWithRelations[]).filter((payment) => payment.paymentStatus === false).length;
+    const completedPayments = (payments as TPaymentWithRelations[]).filter((payment) => payment.paymentStatus === "Completed").length;
+    const pendingPayments = (payments as TPaymentWithRelations[]).filter((payment) => payment.paymentStatus === "Pending").length;
     const revenue = (payments as TPaymentWithRelations[])
-    .filter((payment) => payment.paymentStatus === true)
+    .filter((payment) => payment.paymentStatus === "Completed")
     .reduce((sum, payment) => sum + payment.amount, 0);
 
     return (
@@ -59,7 +58,7 @@ const Payment = () => {
         {/* Stats Cards */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <StatCard title="Total" value={total} color="text-blue-600" bgColor="bg-blue-100" />
-          <StatCard title="Confirmed" value={confirmedPayments} color="text-emerald-600" bgColor="bg-emerald-100" />
+          <StatCard title="Confirmed" value={completedPayments} color="text-emerald-600" bgColor="bg-emerald-100" />
           <StatCard title="Pending" value={pendingPayments} color="text-rose-600" bgColor="bg-rose-100"/>
           <StatCard title="Revenue" value={`Ksh ${revenue.toLocaleString()}`} color="text-sky-600" bgColor="bg-sky-100" />
         </div>
@@ -80,13 +79,14 @@ const Payment = () => {
           <select
             value={statusFilter}
             onChange={(e) =>
-              setStatusFilter(e.target.value as "all" | "confirmed" | "pending")
+              setStatusFilter(e.target.value as "all" | "Completed" | "Cancelled" | "Pending")
             }
             className="w-full md:w-48 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
           >
             <option value="all">All Status</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="pending">Pending</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+            <option value="Pending">Pending</option>
           </select>
         </div>
 
@@ -189,11 +189,13 @@ const StatCard = ({
   </div>
 );
 
-const StatusBadge = ({ status }: { status: boolean }) => {
-  const label = status ? "Confirmed" : "Pending";
+const StatusBadge = ({ status }: { status: string }) => {
+  const label = status === "Completed" ? "Completed" : status === "Pending" ? "Pending" : "Cancelled";
 
-  const styles = status
+  const styles = status === "Completed"
     ? "bg-emerald-100 text-emerald-700"
+    : status === "Pending"
+    ? "bg-yellow-100 text-yellow-700"
     : "bg-red-100 text-red-700";
 
   return (

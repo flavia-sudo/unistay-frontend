@@ -22,7 +22,7 @@ type UpdateMaintenanceInputs = {
   userId: number;
   issueTitle: string;
   description: string;
-  status: boolean;
+  status: string;
 };
 
 const schema = yup.object({
@@ -31,7 +31,7 @@ const schema = yup.object({
   userId: yup.number().required("User ID is required"),
   issueTitle: yup.string().required("Issue title is required"),
   description: yup.string().required("Description is required"),
-  status: yup.boolean().required("Status is required"),
+  status: yup.string().required("Status is required"),
 });
 
 const UpdateMaintenance = ({ maintenance }: UpdateMaintenanceProps) => {
@@ -193,8 +193,9 @@ const UpdateMaintenance = ({ maintenance }: UpdateMaintenanceProps) => {
               {...register("status")}
               className="select select-bordered w-full"
             >
-              <option value="false">Pending</option>
-              <option value="true">Resolved</option>
+              <option value="pending">Pending</option>
+              <option value="on progress">On Progress</option>
+              <option value="resolved">Resolved</option>
             </select>
             {errors.status && (
               <p className="text-red-500 text-xs">

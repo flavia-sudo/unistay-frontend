@@ -19,7 +19,7 @@ const Maintenance = () => {
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] =
-    useState<"all" | "resolved" | "in progress" |"pending">("all");
+    useState<"all" | "resolved" | "on progress" |"pending">("all");
   const [selectedMaintenance, setSelectedMaintenance] =
     useState<TMaintenanceWithRelations | null>(null);
 
@@ -48,7 +48,7 @@ const Maintenance = () => {
   ).length;
 
   const inProgress = maintenances.filter(
-    (m) => m.status === "in progress"
+    (m) => m.status === "on progress"
   ).length;
 
   const pending = maintenances.filter(
@@ -94,14 +94,14 @@ const Maintenance = () => {
             value={statusFilter}
             onChange={(e) =>
               setStatusFilter(
-                e.target.value as "all" | "resolved" | "in progress" | "pending"
+                e.target.value as "all" | "resolved" | "on progress" | "pending"
               )
             }
             className="w-full md:w-48 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none"
           >
             <option value="all">All Status</option>
             <option value="resolved">Resolved</option>
-            <option value="in progress">In Progress</option>
+            <option value="on progress">On Progress</option>
             <option value="pending">Pending</option>
           </select>
         </div>

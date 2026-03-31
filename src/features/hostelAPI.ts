@@ -8,6 +8,7 @@ export type THostel = {
     hostelName: string;
     location: string;
     contact_number: string;
+    rooms_available: number;
     description: string;
     image_URL: string;
     price: number;

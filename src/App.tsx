@@ -28,6 +28,9 @@ import ViewHostel from "./Dashboard/LandlordDashboard/hostels/ViewHostel";
 import ViewBookings from "./Dashboard/LandlordDashboard/bookings/ViewBookings";
 import ViewReview from "./Dashboard/LandlordDashboard/review/ViewReview";
 import ProtectedRoute from "./ProtectedRoute";
+import ViewUsers from "./Dashboard/LandlordDashboard/users/ViewUsers";
+import ViewPayment from "./Dashboard/LandlordDashboard/payment/Payment";
+import MaintenanceLandlord from "./Dashboard/LandlordDashboard/maintenance/ViewMaintenace";
 
 function App() {
   return (
@@ -74,8 +77,11 @@ function App() {
           </ProtectedRoute> } >
           <Route index element={<LandlordDashboard />} />
           <Route path='dashboard' element={<LandlordDashboard />} />
+          <Route path='users' element={<ViewUsers />} />
           <Route path='hostels' element={<ViewHostel />} />
           <Route path='bookings' element={<ViewBookings />} />
+          <Route path='payments' element={<ViewPayment />} />
+          <Route path='maintenance' element={<MaintenanceLandlord />} />
           <Route path='review' element={<ViewReview />} />
           </Route>
           <Route path="*" element={<NotFound/>} />

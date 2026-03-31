@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { ApiDomain } from "../../../utils/APIDomain";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 type Room = {
   roomId: number;
@@ -62,7 +61,7 @@ const BASE_URL: string =
   (typeof import.meta !== "undefined" &&
     (import.meta as any).env?.VITE_API_BASE_URL) ??
   ApiDomain ??
-  "http://localhost:4000";
+  "https://hostel-backend-fyy3.onrender.com";
 
 const getMonthlyRate = (semesterPrice: string | number) =>
   Math.round(
