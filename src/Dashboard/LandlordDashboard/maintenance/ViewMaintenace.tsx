@@ -16,7 +16,7 @@ const MaintenanceLandlord = () => {
 
   // Filter only the maintenance requests belonging to the landlord's hostels
   const maintenances: TMaintenanceWithRelations[] = (maintenanceData?.data ?? []).filter(
-    (m) => m.landlordId === userId // assumes each maintenance record has landlordId
+    (m) => m.userId === userId // assumes each maintenance record has landlordId
   );
 
   const [search, setSearch] = useState("");
