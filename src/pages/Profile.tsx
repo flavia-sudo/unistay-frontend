@@ -63,7 +63,7 @@ const Profile = () => {
   const handleUpdateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch(`http://localhost:4000/users/update/${user?.userId}`, {
+      const res = await fetch(`https://hostel-backend-fyy3.onrender.com/users/update/${user?.userId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(formData),

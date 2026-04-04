@@ -14,8 +14,7 @@ const Maintenance = () => {
   const { data: maintenanceData, isLoading } =
     maintenanceAPI.useGetMaintenancesQuery();
 
-  const maintenances: TMaintenanceWithRelations[] =
-    maintenanceData?.data ?? [];
+  const maintenances: TMaintenanceWithRelations[] = maintenanceData ?? [];
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] =

@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { ApiDomain } from "../utils/APIDomain";
+import type { RootState } from "../app/store";
 
 export type TRoom = {
     roomId: number;
@@ -11,53 +12,57 @@ export type TRoom = {
     capacity: string;
     description: string;
     status: boolean | string | number;
-}
-
-const getToken = () => {
-    try {
-        const stored = localStorage.getItem("auth_user");
-        return stored ? JSON.parse(stored).token : null;
-    } catch { return null; }
 };
 
 export const roomsAPI = createApi({
     reducerPath: "roomsAPI",
     baseQuery: fetchBaseQuery({
         baseUrl: ApiDomain,
-        prepareHeaders: (headers) => {
-            const token = getToken();
+        // ✅ Redux state instead of localStorage
+        prepareHeaders: (headers, { getState }) => {
+            const token = (getState() as RootState).auth.token;
             if (token) headers.set("Authorization", `Bearer ${token}`);
-            headers.set('Content-Type', 'application/json');
+            headers.set("Content-Type", "application/json");
             return headers;
-        }
+        },
     }),
-    tagTypes: ['Rooms'],
+    tagTypes: ["Rooms"],
     endpoints: (builder) => ({
         createRoom: builder.mutation<TRoom, Partial<TRoom>>({
             query: (newRoom) => ({ url: "/room", method: "POST", body: newRoom }),
-            invalidatesTags: ['Rooms'],
+            invalidatesTags: ["Rooms"],
         }),
-        getRooms: builder.query<{ data: TRoom[] }, void>({
+
+        // ✅ transformResponse same pattern as bookingsAPI / hostelsAPI
+        getRooms: builder.query<TRoom[], void>({
             query: () => "/room_all",
-            providesTags: ['Rooms'],
+            transformResponse: (res: { data: TRoom[] } | TRoom[]) =>
+                Array.isArray(res) ? res : res.data,
+            providesTags: ["Rooms"],
         }),
+
         getRoomById: builder.query<TRoom, number>({
             query: (roomId) => `/room/${roomId}`,
         }),
-        getRoomByHostelId: builder.query<{ data: TRoom[] }, number>({
+
+        getRoomByHostelId: builder.query<TRoom[], number>({
             query: (hostelId) => `/room/hostel/${hostelId}`,
+            transformResponse: (res: { data: TRoom[] } | TRoom[]) =>
+                Array.isArray(res) ? res : res.data,
         }),
+
         updateRoom: builder.mutation<TRoom, Partial<TRoom> & { roomId: number }>({
             query: (updatedRoom) => ({
                 url: `/room/${updatedRoom.roomId}`,
                 method: "PUT",
                 body: updatedRoom,
             }),
-            invalidatesTags: ['Rooms'],
+            invalidatesTags: ["Rooms"],
         }),
+
         deleteRoom: builder.mutation<void, number>({
             query: (roomId) => ({ url: `/room/${roomId}`, method: "DELETE" }),
-            invalidatesTags: ['Rooms'],
+            invalidatesTags: ["Rooms"],
         }),
     }),
 });

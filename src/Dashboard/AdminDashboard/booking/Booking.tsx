@@ -15,7 +15,7 @@ const AllBookings = () => {
   const { data: bookingsData, isLoading } =
     bookingsAPI.useGetBookingsQuery();
 
-  const bookings: TBookingWithRelations[] = bookingsData?. data ?? [];
+  const bookings: TBookingWithRelations[] = bookingsData || [];
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "confirmed" | "cancelled">("all");

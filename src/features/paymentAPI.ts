@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { ApiDomain } from "../utils/APIDomain";
+import type { RootState } from "../app/store";
 
 export type TPayment = {
     paymentId: number;
@@ -10,20 +11,25 @@ export type TPayment = {
     paymentStatus: "Pending" | "Completed" | "Cancelled";
     createdAt: Date;
     updatedAt: Date;
-}
+    // ✅ relation fields returned by the API (same pattern as TBooking)
+    firstName?: string;
+    lastName?: string;
+    hostelName?: string;
+    roomNumber?: string;
+    transactionId?: string;
+};
 
 export const paymentsAPI = createApi({
     reducerPath: "paymentsAPI",
-    baseQuery: fetchBaseQuery({ baseUrl: ApiDomain,
-        prepareHeaders: (headers) => {
-            const token = localStorage.getItem("Token");
-            if (token) {
-                headers.set("Authorization", `Bearer ${token}`);
-            }
-            headers.set('Content-Type', 'application/json');
+    baseQuery: fetchBaseQuery({
+        baseUrl: ApiDomain,
+        prepareHeaders: (headers, { getState }) => {
+            const token = (getState() as RootState).auth.token;
+            if (token) headers.set("Authorization", `Bearer ${token}`);
+            headers.set("Content-Type", "application/json");
             return headers;
-        }
-     }),
+        },
+    }),
     tagTypes: ["Payment"],
     endpoints: (builder) => ({
         createPayment: builder.mutation<TPayment, Partial<TPayment>>({
@@ -34,19 +40,31 @@ export const paymentsAPI = createApi({
             }),
             invalidatesTags: ["Payment"],
         }),
-        getPayments: builder.query<{ data: TPayment[] }, void>({
+
+        // ✅ FIXED: transformResponse same pattern as bookingsAPI / hostelsAPI
+        getPayments: builder.query<TPayment[], void>({
             query: () => "/payment_all",
+            transformResponse: (res: { data: TPayment[] } | TPayment[]) =>
+                Array.isArray(res) ? res : res.data,
             providesTags: ["Payment"],
         }),
+
         getPaymentById: builder.query<TPayment, number>({
             query: (paymentId) => `/payment/${paymentId}`,
         }),
-        getPaymentByBookingId: builder.query<{ data: TPayment[] }, number>({
+
+        getPaymentByBookingId: builder.query<TPayment[], number>({
             query: (bookingId) => `/payment/booking/${bookingId}`,
+            transformResponse: (res: { data: TPayment[] } | TPayment[]) =>
+                Array.isArray(res) ? res : res.data,
         }),
-        getPaymentByUserId: builder.query<{ data: TPayment[] }, number>({
+
+        getPaymentByUserId: builder.query<TPayment[], number>({
             query: (userId) => `/payment/user/${userId}`,
+            transformResponse: (res: { data: TPayment[] } | TPayment[]) =>
+                Array.isArray(res) ? res : res.data,
         }),
+
         updatePayment: builder.mutation<TPayment, Partial<TPayment> & { paymentId: number }>({
             query: (updatedPayment) => ({
                 url: `/payment/${updatedPayment.paymentId}`,
@@ -55,6 +73,7 @@ export const paymentsAPI = createApi({
             }),
             invalidatesTags: ["Payment"],
         }),
+
         deletePayment: builder.mutation<void, number>({
             query: (paymentId) => ({
                 url: `/payment/${paymentId}`,

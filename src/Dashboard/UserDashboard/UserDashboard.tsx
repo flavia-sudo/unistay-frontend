@@ -27,10 +27,10 @@ const UserDashboard = () => {
     refetchOnMountOrArgChange: true,
   });
 
-  const hostels: THostel[] = hostelsData?.data || [];
-  const rooms: TRoom[] = roomsData?.data || [];
-  const bookings: TBooking[] = bookingsData?.data || [];
-  const payments: TPayment[] = paymentsData?.data || [];
+  const hostels: THostel[] = hostelsData || [];
+  const rooms: TRoom[] = roomsData || [];
+  const bookings: TBooking[] = bookingsData || [];
+  const payments: TPayment[] = paymentsData || [];
 
   const activeBookings = bookings.filter(b => b.bookingStatus === true).length;
   const pendingPayments = payments.filter(p => p.paymentStatus === "Pending").length;

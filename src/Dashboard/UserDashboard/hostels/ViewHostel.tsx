@@ -35,9 +35,9 @@ const Hostels = () => {
   /* Count available rooms per hostel */
   const hostelsWithRooms = useMemo(() => {
     return hostels.map((hostel) => {
-      const availableRooms = rooms.filter(
-        (room) =>
-          room.hostelId === hostel.hostelId).length;
+     const availableRooms = rooms.filter(
+        (room) => Number(room.hostelId) === Number(hostel.hostelId) && Boolean(room.status)
+      ).length;
 
       return {
         ...hostel,

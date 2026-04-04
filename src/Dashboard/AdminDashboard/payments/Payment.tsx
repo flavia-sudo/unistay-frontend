@@ -14,7 +14,7 @@ type TPaymentWithRelations = TPayment & {
 const Payment = () => {
     const { data: paymentsData, isLoading } = paymentsAPI.useGetPaymentsQuery();
 
-    const payments: TPaymentWithRelations[] = paymentsData?. data ?? [];
+    const payments: TPaymentWithRelations[] = paymentsData ?? [];
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState<"all" | "Completed" | "Cancelled" | "Pending">("all");
     const [selectedPayment, setSelectedPayment] = useState<TPaymentWithRelations | null>(null);

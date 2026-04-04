@@ -6,7 +6,6 @@ import VerifyUser from "./pages/VerifyUser";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
-import Message from "./pages/Message";
 import AdminDashboard from "./Dashboard/AdminDashboard/AdminDashboard";
 import Users from "./Dashboard/AdminDashboard/users/Users";
 import AllHostels from "./Dashboard/AdminDashboard/hostels/Hostel";
@@ -43,7 +42,6 @@ function App() {
           <Route path='/verify' element={<VerifyUser/>} />
           <Route path='/register' element={<Register/>} />
           <Route path='/profile' element={<Profile/>} />
-          <Route path='/messages' element={<Message />} />
           <Route path='/hostels' element={<Hostels />} />
           <Route path='/admin' element={
             <ProtectedRoute allowedRoles={["admin"]}>

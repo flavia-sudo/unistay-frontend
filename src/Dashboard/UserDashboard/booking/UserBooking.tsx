@@ -20,7 +20,7 @@ const UserBooking = () => {
         pollingInterval: 50000,
     });
 
-    const booking = bookingData?.data || [];
+    const booking = bookingData || [];
     const [search, setSearch] = useState("");
     const [selectedBooking, setSelectedBooking] = useState<TBookingWithRelations | null>(null);
     const [statusFilter, setStatusFilter] = useState<"all" | "confirmed" | "cancelled">("all");

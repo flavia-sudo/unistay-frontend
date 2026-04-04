@@ -23,7 +23,7 @@ const UserPayment = () => {
       pollingInterval: 50000,
     });
 
-  const payments: TPaymentWithRelations[] = paymentsData?.data ?? [];
+  const payments: TPaymentWithRelations[] = paymentsData ?? [];
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "Completed" | "Cancelled" | "Pending">("all");

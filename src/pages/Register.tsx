@@ -128,7 +128,7 @@ const Register: React.FC = () => {
     "w-full px-4 py-3 mt-1 text-gray-800 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200";
 
   return (
-    <div className="flex items-center justify-center min-h-screen px-4 py-16 bg-gradient-to-br from-purple-50 to-gray-100">
+    <div className="flex items-center justify-center min-h-screen px-4 py-16 bg-linear-to-br from-purple-50 to-gray-100">
       <div className="w-full max-w-xl p-10 space-y-8 bg-white shadow-2xl rounded-2xl">
         {!showVerificationForm ? (
           <>
@@ -275,7 +275,7 @@ const Register: React.FC = () => {
 
               <button
                 type="submit"
-                className="w-full py-3 font-semibold text-white transition-all duration-300 bg-gradient-to-r from-purple-700 to-purple-900 rounded-lg shadow-lg hover:scale-[1.02] hover:shadow-xl"
+                className="w-full py-3 font-semibold text-white transition-all duration-300 bg-linear-to-r from-purple-700 to-purple-900 rounded-lg shadow-lg hover:scale-[1.02] hover:shadow-xl"
               >
                 Sign Up
               </button>
@@ -305,7 +305,7 @@ const Register: React.FC = () => {
 
               <button
                 type="submit"
-                className="w-full py-3 font-semibold text-white transition-all duration-300 bg-gradient-to-r from-purple-700 to-purple-900 rounded-lg shadow-lg hover:scale-[1.02] hover:shadow-xl"
+                className="w-full py-3 font-semibold text-white transition-all duration-300 bg-linear-to-r from-purple-700 to-purple-900 rounded-lg shadow-lg hover:scale-[1.02] hover:shadow-xl"
               >
                 Verify Account
               </button>

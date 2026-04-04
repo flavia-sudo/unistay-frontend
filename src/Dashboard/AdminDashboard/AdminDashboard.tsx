@@ -32,12 +32,12 @@ export default function AdminDashboard() {
     maintenanceLoading ||
     reviewsLoading;
 
-    const users = usersData?.data ?? [];
-    const hostels = Array.isArray(hostelsData) ? hostelsData : hostelsData?.data ?? [];
-    const bookings = bookingsData?.data ?? [];
-    const payments = paymentsData?.data ?? [];
-    const maintenance = maintenanceData?.data ?? [];
-    const reviews = Array.isArray(reviewsData) ? reviewsData : reviewsData?.data ?? [];
+    const users = usersData || [];
+    const hostels = Array.isArray(hostelsData) ? hostelsData : hostelsData ?? [];
+    const bookings = bookingsData || [];
+    const payments = paymentsData || [];
+    const maintenance = maintenanceData || [];
+    const reviews = Array.isArray(reviewsData) ? reviewsData : reviewsData || [];
 
 
  const students =

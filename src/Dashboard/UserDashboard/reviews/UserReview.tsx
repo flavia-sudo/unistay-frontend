@@ -20,7 +20,7 @@ const UserReview = () => {
       pollingInterval: 50000,
     });
 
-  const reviews: TReviewWithRelations[] = Array.isArray(response?.data) ? response.data : [];
+  const reviews: TReviewWithRelations[] = response? (response as TReviewWithRelations[]) : [];
 
   const [selectedReview, setSelectedReview] = useState<TReviewWithRelations | null>(null);
   const [reviewToDelete, setReviewToDelete] = useState<TReviewWithRelations | null>(null);

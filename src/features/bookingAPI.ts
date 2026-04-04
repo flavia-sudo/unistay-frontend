@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { ApiDomain } from "../utils/APIDomain";
+import type { RootState } from "../app/store"; // ✅ added
 
 export type TBooking = {
     bookingId: number;
@@ -16,41 +17,60 @@ export type TBooking = {
     bookingStatus: boolean;
     createdAt: Date;
     updatedAt: Date;
-}
+};
 
 export const bookingsAPI = createApi({
     reducerPath: "bookingsAPI",
     baseQuery: fetchBaseQuery({
         baseUrl: ApiDomain,
-        prepareHeaders: (headers) => {
-            const stored = localStorage.getItem("auth_user");
-            const token = stored ? JSON.parse(stored).token : null;
+        prepareHeaders: (headers, { getState }) => {
+            // ✅ use Redux state instead of localStorage
+            const token = (getState() as RootState).auth.token;
             if (token) headers.set("Authorization", `Bearer ${token}`);
-            headers.set("Content-Type", "application/json");
             return headers;
         },
     }),
     tagTypes: ["Bookings"],
     endpoints: (builder) => ({
         createBooking: builder.mutation<TBooking, Partial<TBooking>>({
-            query: (newBooking) => ({ url: "/booking", method: "POST", body: newBooking }),
+            query: (newBooking) => ({
+                url: "/booking",
+                method: "POST",
+                body: newBooking,
+            }),
             invalidatesTags: ["Bookings"],
         }),
-        getBookings: builder.query<{ data: TBooking[] }, void>({
+
+        // ✅ FIXED: match hostelAPI response handling
+        getBookings: builder.query<TBooking[], void>({
             query: () => "/booking_all",
+            transformResponse: (res: { data: TBooking[] } | TBooking[]) =>
+                Array.isArray(res) ? res : res.data,
             providesTags: ["Bookings"],
         }),
+
         getBookingById: builder.query<TBooking, number>({
             query: (bookingId) => `/booking/${bookingId}`,
         }),
-        getBookingByUserId: builder.query<{ data: TBooking[] }, number>({
+
+        // ✅ FIXED: consistent response format
+        getBookingByUserId: builder.query<TBooking[], number>({
             query: (userId) => `/booking/user/${userId}`,
+            transformResponse: (res: { data: TBooking[] } | TBooking[]) =>
+                Array.isArray(res) ? res : res.data,
             providesTags: ["Bookings"],
         }),
-        getBookingByRoomId: builder.query<{ data: TBooking[] }, number>({
+
+        getBookingByRoomId: builder.query<TBooking[], number>({
             query: (roomId) => `/booking/room/${roomId}`,
+            transformResponse: (res: { data: TBooking[] } | TBooking[]) =>
+                Array.isArray(res) ? res : res.data,
         }),
-        updateBooking: builder.mutation<TBooking, Partial<TBooking> & { bookingId: number }>({
+
+        updateBooking: builder.mutation<
+            TBooking,
+            Partial<TBooking> & { bookingId: number }
+        >({
             query: (updatedBooking) => ({
                 url: `/booking/${updatedBooking.bookingId}`,
                 method: "PUT",
@@ -58,8 +78,12 @@ export const bookingsAPI = createApi({
             }),
             invalidatesTags: ["Bookings"],
         }),
+
         deleteBooking: builder.mutation<void, number>({
-            query: (bookingId) => ({ url: `/booking/${bookingId}`, method: "DELETE" }),
+            query: (bookingId) => ({
+                url: `/booking/${bookingId}`,
+                method: "DELETE",
+            }),
             invalidatesTags: ["Bookings"],
         }),
     }),

@@ -1,6 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../../app/store";
 import { Search, Calendar } from "lucide-react";
 import { bookingsAPI, type TBooking } from "../../../features/bookingAPI";
+import { hostelsAPI } from "../../../features/hostelAPI";
 
 type TBookingWithRelations = TBooking & {
   firstName?: string;
@@ -10,31 +13,32 @@ type TBookingWithRelations = TBooking & {
 };
 
 const ViewBookings = () => {
-  const [landlordId, setLandlordId] = useState<number | null>(null);
+  const userId = useSelector((state: RootState) => state.auth.user?.userId);
 
-  useEffect(() => {
-    const storedLandlord = localStorage.getItem("landlord");
+  const { data: bookingsData = [], isLoading } =
+    bookingsAPI.useGetBookingsQuery(undefined, {
+      refetchOnMountOrArgChange: true,
+      pollingInterval: 5000, // ✅ was 50000 — polls every 5s to catch payment→booking sync
+    });
 
-    if (storedLandlord) {
-      try {
-        const parsed = JSON.parse(storedLandlord);
-        setLandlordId(Number(parsed.landlordId));
-      } catch (error) {
-        console.error("Error parsing landlord:", error);
-      }
-    }
-  }, []);
+  const bookings: TBookingWithRelations[] = bookingsData;
 
-  const { data, isLoading } = bookingsAPI.useGetBookingsQuery(undefined, {
-    refetchOnMountOrArgChange: true,
-    pollingInterval: 50000,
-  });
+  const { data: hostels = [] } = hostelsAPI.useGetHostelsQuery(undefined);
 
-  const bookings: TBookingWithRelations[] = data?.data || [];
+  const landlordHostels = useMemo(
+    () => hostels.filter((h) => h.userId === userId),
+    [hostels, userId]
+  );
 
-  const landlordBookings = landlordId
-    ? bookings.filter((b) => b.userId === landlordId)
-    : [];
+  const landlordHostelNames = useMemo(
+    () => new Set(landlordHostels.map((h) => h.hostelName)),
+    [landlordHostels]
+  );
+
+  const landlordBookings = useMemo(() => {
+    if (!landlordHostelNames.size) return [];
+    return bookings.filter((b) => landlordHostelNames.has(b.hostelName));
+  }, [bookings, landlordHostelNames]);
 
   const [search, setSearch] = useState("");
 
@@ -52,20 +56,14 @@ const ViewBookings = () => {
 
         {/* HEADER */}
         <div className="mb-8 bg-linear-to-r from-indigo-600 to-purple-600 text-white px-8 py-12 rounded-3xl">
-          <h1 className="text-4xl font-bold">
-            Booking Management
-          </h1>
-
-          <p className="text-indigo-100 mt-3">
-            View all bookings made in your hostels
-          </p>
+          <h1 className="text-4xl font-bold">Booking Management</h1>
+          <p className="text-indigo-100 mt-3">View bookings for your hostels</p>
         </div>
 
         {/* SEARCH */}
         <div className="bg-white rounded-2xl shadow-sm p-4 mb-8">
           <div className="relative w-full md:w-2/3">
             <Search className="absolute left-3 top-3.5 w-4 h-4 text-slate-400" />
-
             <input
               type="text"
               placeholder="Search bookings..."
@@ -78,21 +76,15 @@ const ViewBookings = () => {
 
         {/* TABLE */}
         <div className="bg-white rounded-2xl shadow-sm p-4">
-
           {isLoading ? (
-            <p className="text-center text-slate-500">
-              Loading bookings...
-            </p>
+            <p className="text-center text-slate-500">Loading bookings...</p>
           ) : filteredBookings.length === 0 ? (
             <div className="text-center py-16 text-slate-500">
               <Calendar className="w-14 h-14 mx-auto mb-4 text-slate-300" />
-              <p className="text-lg font-medium">
-                No bookings found
-              </p>
+              <p className="text-lg font-medium">No bookings found</p>
             </div>
           ) : (
             <table className="w-full text-left">
-
               <thead>
                 <tr className="text-slate-500 text-sm border-b">
                   <th className="pb-3">Student</th>
@@ -107,34 +99,19 @@ const ViewBookings = () => {
 
               <tbody>
                 {filteredBookings.map((booking) => (
-                  <tr
-                    key={booking.bookingId}
-                    className="border-b last:border-none"
-                  >
+                  <tr key={booking.bookingId} className="border-b last:border-none">
                     <td className="py-4 font-medium">
                       {booking.firstName} {booking.lastName}
                     </td>
-
-                    <td className="py-4">
-                      {booking.hostelName}
-                    </td>
-
-                    <td className="py-4">
-                      {booking.roomNumber}
-                    </td>
-
+                    <td className="py-4">{booking.hostelName}</td>
+                    <td className="py-4">{booking.roomNumber}</td>
                     <td className="py-4">
                       {new Date(booking.checkInDate).toLocaleDateString()}
                     </td>
-
-                    <td className="py-4">
-                      {booking.duration}
-                    </td>
-
+                    <td className="py-4">{booking.duration ?? "—"}</td>
                     <td className="py-4 font-semibold">
                       Ksh {Number(booking.totalAmount).toLocaleString()}
                     </td>
-
                     <td className="py-4">
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-semibold ${
@@ -143,16 +120,16 @@ const ViewBookings = () => {
                             : "bg-red-100 text-red-700"
                         }`}
                       >
-                        {booking.bookingStatus ? "Confirmed" : "Cancelled"}
+                        {booking.bookingStatus ? "Confirmed" : "Pending"}
                       </span>
                     </td>
                   </tr>
                 ))}
               </tbody>
-
             </table>
           )}
         </div>
+
       </div>
     </div>
   );

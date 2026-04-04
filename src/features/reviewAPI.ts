@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { ApiDomain } from "../utils/APIDomain";
+import type { RootState } from "../app/store";
 
 export type TReview = {
     reviewId: number;
@@ -9,57 +10,69 @@ export type TReview = {
     comment: string;
     createdAt: Date;
     updatedAt: Date;
-}
-
-const getToken = () => {
-    try {
-        const stored = localStorage.getItem("auth_user");
-        return stored ? JSON.parse(stored).token : null;
-    } catch { return null; }
+    // ✅ relation fields (same pattern as TBooking / TPayment)
+    firstName?: string;
+    lastName?: string;
+    hostelName?: string;
+    landlordId?: number;
 };
 
 export const reviewsAPI = createApi({
     reducerPath: "reviewsAPI",
     baseQuery: fetchBaseQuery({
         baseUrl: ApiDomain,
-        prepareHeaders: (headers) => {
-            const token = getToken();
+        // ✅ Redux state instead of localStorage
+        prepareHeaders: (headers, { getState }) => {
+            const token = (getState() as RootState).auth.token;
             if (token) headers.set("Authorization", `Bearer ${token}`);
-            headers.set('Content-Type', 'application/json');
+            headers.set("Content-Type", "application/json");
             return headers;
-        }
+        },
     }),
-    tagTypes: ['Review'],
+    tagTypes: ["Review"],
     endpoints: (builder) => ({
         createReview: builder.mutation<TReview, Partial<TReview>>({
             query: (newReview) => ({ url: "/review", method: "POST", body: newReview }),
-            invalidatesTags: ['Review'],
+            invalidatesTags: ["Review"],
         }),
-        getReviews: builder.query<{ data: TReview[] }, void>({
+
+        // ✅ transformResponse same pattern as bookingsAPI / hostelsAPI
+        getReviews: builder.query<TReview[], void>({
             query: () => "/review_all",
-            providesTags: ['Review'],
+            transformResponse: (res: { data: TReview[] } | TReview[]) =>
+                Array.isArray(res) ? res : res.data,
+            providesTags: ["Review"],
         }),
+
         getReviewById: builder.query<TReview, number>({
             query: (reviewId) => `/review/${reviewId}`,
         }),
-        getReviewByHostelId: builder.query<{ data: TReview[] }, number>({
+
+        getReviewByHostelId: builder.query<TReview[], number>({
             query: (hostelId) => `/review/hostel/${hostelId}`,
+            transformResponse: (res: { data: TReview[] } | TReview[]) =>
+                Array.isArray(res) ? res : res.data,
         }),
-        getReviewByUserId: builder.query<{ data: TReview[] }, number>({
+
+        getReviewByUserId: builder.query<TReview[], number>({
             query: (userId) => `/review/user/${userId}`,
-            providesTags: ['Review'],
+            transformResponse: (res: { data: TReview[] } | TReview[]) =>
+                Array.isArray(res) ? res : res.data,
+            providesTags: ["Review"],
         }),
+
         updateReview: builder.mutation<TReview, Partial<TReview> & { reviewId: number }>({
             query: (updatedReview) => ({
                 url: `/review/${updatedReview.reviewId}`,
                 method: "PUT",
                 body: updatedReview,
             }),
-            invalidatesTags: ['Review'],
+            invalidatesTags: ["Review"],
         }),
+
         deleteReview: builder.mutation<void, number>({
             query: (reviewId) => ({ url: `/review/${reviewId}`, method: "DELETE" }),
-            invalidatesTags: ['Review'],
+            invalidatesTags: ["Review"],
         }),
     }),
 });

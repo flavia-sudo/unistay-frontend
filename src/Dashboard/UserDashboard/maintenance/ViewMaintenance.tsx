@@ -19,7 +19,7 @@ const UserMaintenance = () => {
       refetchOnMountOrArgChange: true,
     });
 
-  const maintenances: TMaintenanceWithRelations[] = maintenanceData?.data ?? [];
+  const maintenances: TMaintenanceWithRelations[] = maintenanceData ?? [];
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "resolved" | "in progress" | "pending">("all");

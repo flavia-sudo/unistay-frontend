@@ -6,7 +6,7 @@ import { Search, Edit, Trash2 } from "lucide-react";
 
 const Users = () => {
   const { data, isLoading, refetch } = usersAPI.useGetUsersQuery();
-  const users = data?.data ?? [];
+  const users = data ?? [];
 
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<"all" | "Student" | "Landlord" | "Admin">("all");

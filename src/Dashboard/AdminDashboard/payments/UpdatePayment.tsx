@@ -20,7 +20,7 @@ type UpdatePaymentInputs = {
     userId: number;
     amount: number;
     method: string;
-    paymentStatus: boolean;
+    paymentStatus: TPayment["paymentStatus"];
 };
 
 const schema = yup.object({
@@ -28,7 +28,7 @@ const schema = yup.object({
     userId: yup.number().required("User ID is required"),
     amount: yup.number().required("Amount is required"),
     method: yup.string().required("Payment method is required"),
-    paymentStatus: yup.boolean().required("Payment status is required"),
+    paymentStatus: yup.string().oneOf(["Pending", "Completed", "Cancelled"]).required("Payment status is required"),
 });
 
 const UpdatePayment = ({ payment }: UpdatePaymentProps) => {

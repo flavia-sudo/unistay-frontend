@@ -5,11 +5,10 @@ type TReviewWithRelations = TReview & {
 };
 
 const Review = () => {
-  const { data, isLoading } = reviewsAPI.useGetReviewsQuery();
-  console.log("Reviews:", data);
+  const { data: response, isLoading } = reviewsAPI.useGetReviewsQuery();
+  console.log("Reviews:", response);
 
-  const reviews: TReviewWithRelations[] = 
-  Array.isArray(data)? data : data?. data ?? [];
+  const reviews: TReviewWithRelations[] = response? (response as TReviewWithRelations[]) : [];
 
   const totalReviews = reviews.length;
 

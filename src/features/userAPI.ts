@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { ApiDomain } from "../utils/APIDomain";
+import type { RootState } from "../app/store";
 
 export type TUser = {
     userId: number;
@@ -25,39 +26,51 @@ export type TverifyUser = {
     code: string;
 };
 
-const getToken = () => {
-    try {
-        const stored = localStorage.getItem("auth_user");
-        return stored ? JSON.parse(stored).token : null;
-    } catch { return null; }
-};
-
 export const usersAPI = createApi({
     reducerPath: "usersAPI",
     baseQuery: fetchBaseQuery({
         baseUrl: ApiDomain,
-        prepareHeaders: (headers) => {
-            const token = getToken();
-            if (token) headers.set("Authorization", `Bearer ${token}`);
+        prepareHeaders: (headers, { getState }) => {
+            // ✅ read token from Redux state (same pattern as hostelsAPI)
+            const token = (getState() as RootState).auth.token;
+
+            if (token) {
+                headers.set("Authorization", `Bearer ${token}`);
+            }
+
             return headers;
         },
     }),
     tagTypes: ["Users"],
     endpoints: (builder) => ({
         createUsers: builder.mutation<TUser, Partial<TUser>>({
-            query: (newUser) => ({ url: "/auth/register", method: "POST", body: newUser }),
+            query: (newUser) => ({
+                url: "/auth/register",
+                method: "POST",
+                body: newUser,
+            }),
             invalidatesTags: ["Users"],
         }),
+
         verifyUser: builder.mutation<TUser, TverifyUser>({
-            query: (data) => ({ url: "/auth/verify", method: "POST", body: data }),
+            query: (data) => ({
+                url: "/auth/verify",
+                method: "POST",
+                body: data,
+            }),
         }),
-        getUsers: builder.query<{ data: TUser[] }, void>({
+
+        getUsers: builder.query<TUser[], void>({
             query: () => "/user_all",
+            transformResponse: (res: { data: TUser[] } | TUser[]) =>
+                Array.isArray(res) ? res : res.data,
             providesTags: ["Users"],
         }),
+
         getUserById: builder.query<TUser, number>({
             query: (userId) => `/user/${userId}`,
         }),
+
         updateUser: builder.mutation<TUser, Partial<TUser> & { userId: number }>({
             query: (updatedUser) => ({
                 url: `/user/${updatedUser.userId}`,
@@ -66,12 +79,19 @@ export const usersAPI = createApi({
             }),
             invalidatesTags: ["Users"],
         }),
+
         deleteUser: builder.mutation<{ success: boolean; userId: number }, number>({
-            query: (userId) => ({ url: `/users/delete/${userId}`, method: "DELETE" }),
+            query: (userId) => ({
+                url: `/users/delete/${userId}`,
+                method: "DELETE",
+            }),
             invalidatesTags: ["Users"],
         }),
-        getLandlords: builder.query<{ data: TUser[] }, void>({
+
+        getLandlords: builder.query<TUser[], void>({
             query: () => "/users/landlords_all",
+            transformResponse: (res: { data: TUser[] } | TUser[]) =>
+                Array.isArray(res) ? res : res.data,
             providesTags: ["Users"],
         }),
     }),
@@ -84,4 +104,5 @@ export const {
     useUpdateUserMutation,
     useGetUserByIdQuery,
     useGetLandlordsQuery,
+    useDeleteUserMutation,
 } = usersAPI;
