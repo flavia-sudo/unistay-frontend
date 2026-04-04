@@ -48,7 +48,7 @@ const Profile = () => {
 
   const handleDeleteAccount = async () => {
     try {
-      const res = await fetch(`http://localhost:4000/users/delete/${user?.userId}`, {
+      const res = await fetch(`https://hostel-backend-fyy3.onrender.com/users/delete/${user?.userId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
