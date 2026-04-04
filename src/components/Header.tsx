@@ -1,4 +1,3 @@
-// Header.tsx - read from Redux, not localStorage
 import { useState } from 'react';
 import { FaBuilding } from "react-icons/fa";
 import { NavLink, useNavigate } from 'react-router-dom';
@@ -18,6 +17,9 @@ const Header = () => {
   const isAdmin = role === 'admin';
   const isLandlord = role === 'landlord';
   const isStudent = role === 'student';
+
+  // Landlords should NOT see Browse Hostels
+  const canBrowseHostels = !isLandlord;
 
   const handleLogout = () => {
     dispatch(logout());
@@ -42,9 +44,12 @@ const Header = () => {
             </span>
           </NavLink>
 
+          {/* Desktop Nav */}
           <nav className="hidden md:flex space-x-8 text-black">
             <NavLink to="/" className={getLinkClass} data-testid="desktop-home">Home</NavLink>
-            <NavLink to="/hostels" className={getLinkClass} data-testid="desktop-search">Browse Hostels</NavLink>
+            {canBrowseHostels && (
+              <NavLink to="/hostels" className={getLinkClass} data-testid="desktop-search">Browse Hostels</NavLink>
+            )}
             {isLoggedIn && isStudent && <NavLink to="/dashboard" className={getLinkClass}>Dashboard</NavLink>}
             {isLoggedIn && isLandlord && <NavLink to="/landlord" className={getLinkClass}>Landlord</NavLink>}
             {isLoggedIn && isAdmin && <NavLink to="/admin" className={getLinkClass}>Admin</NavLink>}
@@ -68,6 +73,7 @@ const Header = () => {
             )}
           </div>
 
+          {/* Mobile Hamburger */}
           <div className="md:hidden">
             <button onClick={() => setIsMenuOpen(!isMenuOpen)} data-testid="mobile-menu-button" className="text-gray-900 hover:text-purple-600 transition-colors duration-200">
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -75,11 +81,14 @@ const Header = () => {
           </div>
         </div>
 
+        {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden bg-white border-t shadow-sm">
             <div className="px-4 py-3 space-y-1">
               <NavLink to="/" className={getLinkClass} onClick={() => setIsMenuOpen(false)}>Home</NavLink>
-              <NavLink to="/hostels" className={getLinkClass} onClick={() => setIsMenuOpen(false)}>Browse Hostels</NavLink>
+              {canBrowseHostels && (
+                <NavLink to="/hostels" className={getLinkClass} onClick={() => setIsMenuOpen(false)}>Browse Hostels</NavLink>
+              )}
               {isLoggedIn && isStudent && <NavLink to="/dashboard" className={getLinkClass} onClick={() => setIsMenuOpen(false)}>Dashboard</NavLink>}
               {isLoggedIn && isLandlord && <NavLink to="/landlord" className={getLinkClass} onClick={() => setIsMenuOpen(false)}>Landlord</NavLink>}
               {isLoggedIn && isAdmin && <NavLink to="/admin" className={getLinkClass} onClick={() => setIsMenuOpen(false)}>Admin</NavLink>}

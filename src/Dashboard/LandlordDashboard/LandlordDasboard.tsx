@@ -1,20 +1,26 @@
-import {
-  Building2,
-  Users,
-  Calendar,
-  CreditCard,
-  Plus,
-  ArrowRight,
-} from "lucide-react";
+import { Building2, Users, Calendar, CreditCard, Plus, ArrowRight } from "lucide-react";
 import { MdWavingHand } from "react-icons/md";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../app/store";
-
 import { hostelsAPI } from "../../features/hostelAPI";
 import { roomsAPI } from "../../features/roomAPI";
 import { bookingsAPI } from "../../features/bookingAPI";
 import { paymentsAPI } from "../../features/paymentAPI";
+
+const StatCard = ({
+  label, value, icon, bg,
+}: {
+  label: string; value: string | number; icon: React.ReactNode; bg: string;
+}) => (
+  <div className="bg-white p-7 rounded-2xl shadow flex justify-between items-center">
+    <div>
+      <p className="text-gray-500">{label}</p>
+      <h2 className="text-3xl font-bold mt-2">{value}</h2>
+    </div>
+    <div className={`${bg} p-4 rounded-xl`}>{icon}</div>
+  </div>
+);
 
 const LandlordDashboard = () => {
   const navigate = useNavigate();
@@ -23,36 +29,30 @@ const LandlordDashboard = () => {
   const firstName = user?.firstName ?? "Landlord";
   const landlordId = user?.userId;
 
-  const { data: hostels = [] }   = hostelsAPI.useGetHostelsQuery();
-  const { data: rooms = [] }     = roomsAPI.useGetRoomsQuery();         // ✅ now TRoom[] directly
-  const { data: bookings = [] }  = bookingsAPI.useGetBookingsQuery(undefined, {
+  const { data: hostels = [] }  = hostelsAPI.useGetHostelsQuery();
+  const { data: rooms = [] }    = roomsAPI.useGetRoomsQuery();
+  const { data: bookings = [] } = bookingsAPI.useGetBookingsQuery(undefined, {
     skip: !landlordId,
     refetchOnMountOrArgChange: true,
   });
-  const { data: payments = [] }  = paymentsAPI.useGetPaymentsQuery(undefined, {
+  const { data: payments = [] } = paymentsAPI.useGetPaymentsQuery(undefined, {
     skip: !landlordId,
     refetchOnMountOrArgChange: true,
   });
 
-  /* ✅ FILTER LANDLORD DATA */
-  const landlordHostels = hostels.filter((h) => h.userId === landlordId);
-
-  const landlordHostelIds = new Set(landlordHostels.map((h) => h.hostelId));
-
-  const landlordRooms = rooms.filter((r) => landlordHostelIds.has(r.hostelId));
-
-  const landlordRoomIds = new Set(landlordRooms.map((r) => r.roomId));
-
-  const landlordBookings = bookings.filter((b) => landlordRoomIds.has(b.roomId));
-
+  // ✅ Filter all data down to only this landlord's scope
+  const landlordHostels    = hostels.filter((h) => h.userId === landlordId);
+  const landlordHostelIds  = new Set(landlordHostels.map((h) => h.hostelId));
+  const landlordRooms      = rooms.filter((r) => landlordHostelIds.has(r.hostelId));
+  const landlordRoomIds    = new Set(landlordRooms.map((r) => r.roomId));
+  const landlordBookings   = bookings.filter((b) => landlordRoomIds.has(b.roomId));
   const landlordBookingIds = new Set(landlordBookings.map((b) => b.bookingId));
+  const landlordPayments   = payments.filter((p) => landlordBookingIds.has(p.bookingId));
 
-  const landlordPayments = payments.filter((p) => landlordBookingIds.has(p.bookingId));
-
-  /* ✅ STATS */
+  // Stats
   const totalProperties = landlordHostels.length;
   const totalRooms      = landlordRooms.length;
-const availableRooms = landlordRooms.filter((r) => !r.status).length;
+  const availableRooms  = landlordRooms.filter((r) => Boolean(r.status)).length;
   const pendingBookings = landlordBookings.filter((b) => b.bookingStatus === false).length;
   const totalRevenue    = landlordPayments
     .filter((p) => p.paymentStatus === "Completed")
@@ -61,7 +61,7 @@ const availableRooms = landlordRooms.filter((r) => !r.status).length;
   return (
     <div className="flex-1 min-h-screen bg-slate-100 p-6">
 
-      {/* HEADER */}
+      {/* Header */}
       <div className="bg-linear-to-r from-green-600 to-teal-700 text-white px-10 py-14 rounded-3xl shadow">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div>
@@ -73,8 +73,9 @@ const availableRooms = landlordRooms.filter((r) => !r.status).length;
             <p className="text-green-100 mt-2">Here's what's happening with your properties</p>
           </div>
 
+          {/* ✅ Fixed path: /landlord/hostel → /landlord/hostels */}
           <button
-            onClick={() => navigate("/landlord/hostel")}
+            onClick={() => navigate("/landlord/hostels")}
             className="bg-white text-green-700 px-6 py-3 rounded-lg font-semibold flex items-center gap-2 shadow hover:bg-gray-100"
           >
             <Plus size={18} />
@@ -83,18 +84,18 @@ const availableRooms = landlordRooms.filter((r) => !r.status).length;
         </div>
       </div>
 
-      {/* CONTENT */}
+      {/* Content */}
       <div className="max-w-7xl mx-auto px-8 py-10 space-y-10">
 
-        {/* STATS */}
+        {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <StatCard label="Total Properties" value={totalProperties}               icon={<Building2 className="text-indigo-600" />} bg="bg-indigo-100" />
-          <StatCard label="Available Rooms"  value={`${availableRooms}/${totalRooms}`} icon={<Users className="text-green-600" />}   bg="bg-green-100" />
-          <StatCard label="Pending Bookings" value={pendingBookings}                icon={<Calendar className="text-orange-600" />}  bg="bg-orange-100" />
+          <StatCard label="Total Properties" value={totalProperties}                    icon={<Building2 className="text-indigo-600" />} bg="bg-indigo-100" />
+          <StatCard label="Available Rooms"  value={`${availableRooms}/${totalRooms}`}  icon={<Users className="text-green-600" />}     bg="bg-green-100"  />
+          <StatCard label="Pending Bookings" value={pendingBookings}                    icon={<Calendar className="text-orange-600" />}  bg="bg-orange-100" />
           <StatCard label="Total Revenue"    value={`Ksh ${totalRevenue.toLocaleString()}`} icon={<CreditCard className="text-purple-600" />} bg="bg-purple-100" />
         </div>
 
-        {/* RECENT BOOKINGS */}
+        {/* Recent Bookings */}
         <div className="bg-white rounded-2xl shadow p-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold">Recent Bookings</h2>
@@ -123,7 +124,7 @@ const availableRooms = landlordRooms.filter((r) => !r.status).length;
           )}
         </div>
 
-        {/* MY PROPERTIES */}
+        {/* My Properties */}
         <div className="bg-white rounded-2xl shadow p-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold">My Properties</h2>
@@ -145,7 +146,9 @@ const availableRooms = landlordRooms.filter((r) => !r.status).length;
                   <div>
                     <p className="font-semibold text-slate-800">{h.hostelName}</p>
                     <p className="text-sm text-slate-500">{h.location}</p>
-                    <p className="text-sm text-green-600 font-medium">Ksh {h.price.toLocaleString()}</p>
+                    <p className="text-sm text-green-600 font-medium">
+                      Ksh {Number(h.price).toLocaleString()}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -159,18 +162,3 @@ const availableRooms = landlordRooms.filter((r) => !r.status).length;
 };
 
 export default LandlordDashboard;
-
-/* ---------------- Reusable Component ---------------- */
-const StatCard = ({
-  label, value, icon, bg,
-}: {
-  label: string; value: string | number; icon: React.ReactNode; bg: string;
-}) => (
-  <div className="bg-white p-7 rounded-2xl shadow flex justify-between items-center">
-    <div>
-      <p className="text-gray-500">{label}</p>
-      <h2 className="text-3xl font-bold mt-2">{value}</h2>
-    </div>
-    <div className={`${bg} p-4 rounded-xl`}>{icon}</div>
-  </div>
-);

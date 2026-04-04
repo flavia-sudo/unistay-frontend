@@ -2,12 +2,16 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { login } from "../features/login/authSlice";
+import type { RootState } from "../app/store";
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  // ✅ Read email from Redux, not localStorage
+  const reduxEmail = useSelector((state: RootState) => state.auth.user?.email);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -22,8 +26,7 @@ const Register: React.FC = () => {
   const [showVerificationForm, setShowVerificationForm] = useState(false);
 
   const togglePassword = () => setShowPassword((prev) => !prev);
-  const toggleConfirmPassword = () =>
-    setShowConfirmPassword((prev) => !prev);
+  const toggleConfirmPassword = () => setShowConfirmPassword((prev) => !prev);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -33,46 +36,30 @@ const Register: React.FC = () => {
       setErrorMessage("Invalid email address!");
       return;
     }
-
     if (!phoneNumber.match(/^07\d{8}$/)) {
       setErrorMessage("Invalid phone number!");
       return;
     }
-
     if (password.length < 6) {
       setErrorMessage("Password should be at least 6 characters long");
       return;
     }
-
     if (password !== confirmPassword) {
       setErrorMessage("Passwords do not match!");
       return;
     }
 
-    const userDetails = {
-      firstName,
-      lastName,
-      email,
-      phoneNumber,
-      password,
-    };
-
     try {
       const response = await axios.post(
         "https://hostel-backend-fyy3.onrender.com/auth/register",
-        userDetails,
+        { firstName, lastName, email, phoneNumber, password },
         { headers: { "Content-Type": "application/json" } }
       );
 
-      if (response.status !== 201) {
-        navigate("/verify");
-      } else {
-        setErrorMessage(response.data.message || "Registration failed.");
-      }
-      console.log("Registration successful:", response.data);
       const user = response.data.user;
       const token = response.data.token;
 
+      // ✅ Dispatch to Redux — authSlice persists to localStorage automatically
       dispatch(login({ ...user, token }));
 
       setFirstName("");
@@ -85,10 +72,10 @@ const Register: React.FC = () => {
       setShowVerificationForm(true);
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        console.error("Registration error:", error.response?.data);
-        setErrorMessage(error.response?.data?.message || "Registration failed. Please try again.");
+        setErrorMessage(
+          error.response?.data?.message || "Registration failed. Please try again."
+        );
       } else {
-        console.error("Unexpected error:", error);
         setErrorMessage("An unexpected error occurred");
       }
     }
@@ -97,16 +84,19 @@ const Register: React.FC = () => {
   const handleVerify = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrorMessage("");
-    const user = localStorage.getItem("User");
-    const email = user ? JSON.parse(user).email : "";
-    console.log(email);
+
+    // ✅ Read email from Redux state — no localStorage access
+    const emailToVerify = reduxEmail;
+    if (!emailToVerify) {
+      setErrorMessage("Session expired. Please register again.");
+      return;
+    }
 
     try {
-      const response = await axios.post(
-        "https://hostel-backend-fyy3.onrender.com/auth/verify",
-        { email, code }
-      );
-      console.log(response.data);
+      const response = await axios.post("https://hostel-backend-fyy3.onrender.com/auth/verify", {
+        email: emailToVerify,
+        code,
+      });
 
       if (response.status === 200) {
         navigate("/");
@@ -115,10 +105,10 @@ const Register: React.FC = () => {
       }
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        console.error("Verification error:", error.response?.data);
-        setErrorMessage(error.response?.data?.error || "Verification failed");
+        setErrorMessage(
+          error.response?.data?.error || "Verification failed"
+        );
       } else {
-        console.error("Unexpected error:", error);
         setErrorMessage("An unexpected error occurred");
       }
     }
@@ -133,9 +123,7 @@ const Register: React.FC = () => {
         {!showVerificationForm ? (
           <>
             <div>
-              <h2 className="text-4xl font-bold text-center text-gray-800">
-                Sign Up
-              </h2>
+              <h2 className="text-4xl font-bold text-center text-gray-800">Sign Up</h2>
               <p className="mt-2 text-sm text-center text-gray-500">
                 Create your account to get started
               </p>
@@ -144,34 +132,27 @@ const Register: React.FC = () => {
             <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    First Name
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700">First Name</label>
                   <input
                     type="text"
                     value={firstName}
                     onChange={(e) =>
                       setFirstName(
-                        e.target.value.charAt(0).toUpperCase() +
-                          e.target.value.slice(1)
+                        e.target.value.charAt(0).toUpperCase() + e.target.value.slice(1)
                       )
                     }
                     required
                     className={inputStyle}
                   />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Last Name
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700">Last Name</label>
                   <input
                     type="text"
                     value={lastName}
                     onChange={(e) =>
                       setLastName(
-                        e.target.value.charAt(0).toUpperCase() +
-                          e.target.value.slice(1)
+                        e.target.value.charAt(0).toUpperCase() + e.target.value.slice(1)
                       )
                     }
                     required
@@ -181,9 +162,7 @@ const Register: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Phone Number
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Phone Number</label>
                 <input
                   type="text"
                   value={phoneNumber}
@@ -194,9 +173,7 @@ const Register: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Email
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Email</label>
                 <input
                   type="email"
                   value={email}
@@ -206,11 +183,8 @@ const Register: React.FC = () => {
                 />
               </div>
 
-              {/* Password */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Password
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Password</label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
@@ -229,11 +203,8 @@ const Register: React.FC = () => {
                 </div>
               </div>
 
-              {/* Confirm Password */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Confirm Password
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
                 <div className="relative">
                   <input
                     type={showConfirmPassword ? "text" : "password"}
@@ -247,19 +218,13 @@ const Register: React.FC = () => {
                     onClick={toggleConfirmPassword}
                     className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500"
                   >
-                    {showConfirmPassword ? (
-                      <EyeOff size={18} />
-                    ) : (
-                      <Eye size={18} />
-                    )}
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
               </div>
 
               {errorMessage && (
-                <div className="text-sm text-center text-red-600">
-                  {errorMessage}
-                </div>
+                <div className="text-sm text-center text-red-600">{errorMessage}</div>
               )}
 
               <div className="text-center text-sm text-gray-600">
@@ -286,6 +251,9 @@ const Register: React.FC = () => {
             <h2 className="text-3xl font-bold text-center text-gray-800">
               Enter Verification Code
             </h2>
+            <p className="text-sm text-center text-gray-500">
+              A code was sent to <span className="font-medium text-purple-700">{reduxEmail}</span>
+            </p>
 
             <form className="mt-6 space-y-5" onSubmit={handleVerify}>
               <input
@@ -298,9 +266,7 @@ const Register: React.FC = () => {
               />
 
               {errorMessage && (
-                <div className="text-sm text-center text-red-600">
-                  {errorMessage}
-                </div>
+                <div className="text-sm text-center text-red-600">{errorMessage}</div>
               )}
 
               <button

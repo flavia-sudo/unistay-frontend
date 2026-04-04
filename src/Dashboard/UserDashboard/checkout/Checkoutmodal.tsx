@@ -62,15 +62,24 @@ const BASE_URL: string =
   ApiDomain ??
   "https://hostel-backend-fyy3.onrender.com";
 
-// ✅ FIXED: get the raw semester price as a number
+// ✅ Read auth from auth_user key — matches authSlice
+const getAuth = (): { userId: number; token: string | null } => {
+  try {
+    const stored = localStorage.getItem("auth_user");
+    if (!stored) return { userId: 0, token: null };
+    const { user, token } = JSON.parse(stored);
+    return { userId: user?.userId ?? 0, token: token ?? null };
+  } catch {
+    return { userId: 0, token: null };
+  }
+};
+
 const getSemesterPrice = (price: string | number): number =>
   Number(String(price).replace(/\D/g, ""));
 
-// ✅ FIXED: display-only monthly rate (rounded for UI)
 const getDisplayMonthlyRate = (semesterPrice: number): number =>
   Math.round(semesterPrice / SEMESTER_MONTHS);
 
-// ✅ FIXED: total = (semesterPrice / SEMESTER_MONTHS) * months — semester stays exact
 const calcTotal = (semesterPrice: number, months: number): number =>
   Math.round((semesterPrice / SEMESTER_MONTHS) * months);
 
@@ -83,7 +92,7 @@ function normalizePhone(raw: string): string | null {
 }
 
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const token = localStorage.getItem("Token");
+  const { token } = getAuth(); // ✅ reads from auth_user
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
     headers: {
@@ -100,8 +109,9 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 async function fetchRooms(hostelId: number): Promise<Room[]> {
+  const { token } = getAuth(); // ✅ reads from auth_user
   const text = await fetch(`${BASE_URL}/room/hostel/${hostelId}`, {
-    headers: { Authorization: `Bearer ${localStorage.getItem("Token") ?? ""}` },
+    headers: { Authorization: `Bearer ${token ?? ""}` },
   }).then((r) => r.text());
   if (!text.trim()) return [];
   try {
@@ -219,9 +229,8 @@ export default function CheckoutModal({ hostel, onClose }: CheckoutModalProps) {
   } | null>(null);
   const [polling, setPolling] = useState(false);
 
-  const userId = Number(localStorage.getItem("userId") ?? 1);
+  const { userId } = getAuth(); // ✅ reads correct userId from auth_user
 
-  // ✅ FIXED: compute semester price and total correctly
   const semesterPrice = selectedRoom
     ? getSemesterPrice(selectedRoom.price)
     : getSemesterPrice(hostel.price);
@@ -270,7 +279,7 @@ export default function CheckoutModal({ hostel, onClose }: CheckoutModalProps) {
       const { bookingId } = await createBooking({
         hostelId: hostel.hostelId,
         roomId: selectedRoom!.roomId,
-        userId,
+        userId, // ✅ correct userId from auth_user
         checkInDate,
         duration: duration.label,
         totalAmount: String(totalAmount),
@@ -279,7 +288,7 @@ export default function CheckoutModal({ hostel, onClose }: CheckoutModalProps) {
 
       const { paymentId } = await createPayment({
         bookingId,
-        userId,
+        userId, // ✅ correct userId from auth_user
         amount: String(totalAmount),
         method: "M-Pesa",
         transactionId: `PENDING_${Date.now()}`,
@@ -347,12 +356,11 @@ export default function CheckoutModal({ hostel, onClose }: CheckoutModalProps) {
                 <div className="flex items-center gap-2 text-red-500 text-sm bg-red-50 rounded-xl p-3">
                   <AlertCircle size={16} /> {roomsError}
                 </div>
-              ) : rooms.filter((r) => !r.status).length === 0 ? (
+              ) : rooms.filter((r) => Boolean(r.status)).length === 0 ? (
                 <p className="text-center text-gray-400 py-8 text-sm">No available rooms at the moment.</p>
               ) : (
                 <div className="space-y-3">
-                  {rooms.filter((r) => !r.status).map((room) => {
-                    // ✅ FIXED: display monthly rate per room
+                  {rooms.filter((r) => Boolean(r.status)).map((room) => {
                     const roomSemesterPrice = getSemesterPrice(room.price);
                     const roomDisplayMonthly = getDisplayMonthlyRate(roomSemesterPrice);
                     return (
@@ -455,7 +463,6 @@ export default function CheckoutModal({ hostel, onClose }: CheckoutModalProps) {
                 </div>
               </label>
 
-              {/* ✅ FIXED: pricing breakdown uses corrected values */}
               <div className="bg-gray-50 rounded-2xl p-4 mb-5 space-y-2 text-sm">
                 <div className="flex justify-between text-gray-500">
                   <span>Semester price</span>
