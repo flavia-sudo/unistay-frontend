@@ -40,7 +40,7 @@ const Payment = () => {
     const pendingPayments = (payments as TPaymentWithRelations[]).filter((payment) => payment.paymentStatus === "Pending").length;
     const revenue = (payments as TPaymentWithRelations[])
     .filter((payment) => payment.paymentStatus === "Completed")
-    .reduce((sum, payment) => sum + payment.amount, 0);
+    .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
 
     return (
       <div className="p-6 min-h-screen bg-slate-50">

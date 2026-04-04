@@ -18,8 +18,7 @@ const Header = () => {
   const isLandlord = role === 'landlord';
   const isStudent = role === 'student';
 
-  // Landlords should NOT see Browse Hostels
-  const canBrowseHostels = !isLandlord;
+  const canBrowseHostels = isLoggedIn && !isLandlord;
 
   const handleLogout = () => {
     dispatch(logout());

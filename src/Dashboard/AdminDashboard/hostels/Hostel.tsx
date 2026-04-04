@@ -1,8 +1,7 @@
 import { useMemo, useState } from "react";
-import { Search, Trash2, Eye } from "lucide-react";
+import { Search, Trash2 } from "lucide-react";
 import { hostelsAPI, type THostel } from "../../../features/hostelAPI";
 import DeleteHostel from "./DeleteHostel";
-import { useNavigate } from "react-router-dom";
 
 type THostelWithRelations = THostel & {
   firstName?: string;
@@ -10,7 +9,6 @@ type THostelWithRelations = THostel & {
 };
 
 const AllHostels = () => {
-  const navigate = useNavigate();
 
   const { data: hostelsData = [], isLoading } =
     hostelsAPI.useGetHostelsQuery();
@@ -112,15 +110,6 @@ const AllHostels = () => {
                     </td>
 
                     <td className="py-4 text-right space-x-2">
-                      
-                      <button
-                        onClick={() =>
-                          navigate(`/hostel/${hostel.hostelId}`)
-                        }
-                        className="p-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600"
-                      >
-                        <Eye size={16} />
-                      </button>
 
                       <button
                         onClick={() => {
