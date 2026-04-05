@@ -125,10 +125,10 @@ const UpdateMaintenance = ({ maintenance }: UpdateMaintenanceProps) => {
             <input
               type="number"
               {...register("hostelId")}
-              className="input input-bordered w-full"
+              className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             {errors.hostelId && (
-              <p className="text-red-500 text-xs">
+              <p className="text-red-500 text-xs mt-1">
                 {errors.hostelId.message}
               </p>
             )}
@@ -142,10 +142,10 @@ const UpdateMaintenance = ({ maintenance }: UpdateMaintenanceProps) => {
             <input
               type="number"
               {...register("roomId")}
-              className="input input-bordered w-full"
+              className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             {errors.roomId && (
-              <p className="text-red-500 text-xs">
+              <p className="text-red-500 text-xs mt-1">
                 {errors.roomId.message}
               </p>
             )}
@@ -159,10 +159,10 @@ const UpdateMaintenance = ({ maintenance }: UpdateMaintenanceProps) => {
             <input
               type="text"
               {...register("issueTitle")}
-              className="input input-bordered w-full"
+              className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             {errors.issueTitle && (
-              <p className="text-red-500 text-xs">
+              <p className="text-red-500 text-xs mt-1">
                 {errors.issueTitle.message}
               </p>
             )}
@@ -175,7 +175,7 @@ const UpdateMaintenance = ({ maintenance }: UpdateMaintenanceProps) => {
             </label>
             <textarea
               {...register("description")}
-              className="textarea textarea-bordered w-full"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             />
             {errors.description && (
               <p className="text-red-500 text-xs">
@@ -191,14 +191,14 @@ const UpdateMaintenance = ({ maintenance }: UpdateMaintenanceProps) => {
             </label>
             <select
               {...register("status")}
-              className="select select-bordered w-full"
+              className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="pending">Pending</option>
               <option value="on progress">On Progress</option>
               <option value="resolved">Resolved</option>
             </select>
             {errors.status && (
-              <p className="text-red-500 text-xs">
+              <p className="text-red-500 text-xs mt-1">
                 {errors.status.message}
               </p>
             )}
@@ -209,7 +209,7 @@ const UpdateMaintenance = ({ maintenance }: UpdateMaintenanceProps) => {
             <button
               type="button"
               onClick={handleClose}
-              className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-md"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md"
             >
               Cancel
             </button>
@@ -217,7 +217,7 @@ const UpdateMaintenance = ({ maintenance }: UpdateMaintenanceProps) => {
             <button
               type="submit"
               disabled={isLoading}
-              className="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-md"
+              className="cursor-pointer px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-60"
             >
               {isLoading ? "Updating..." : "Update Maintenance"}
             </button>

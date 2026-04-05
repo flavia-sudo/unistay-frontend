@@ -83,35 +83,35 @@ const UpdateProfile = ({ user, isOpen, onClose, refetch }: UpdateProfileProps) =
       <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-2xl p-6 w-full max-w-md z-50">
         <h3 className="font-bold text-xl mb-4 text-gray-800">Update Profile</h3>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <input
             type="text"
             {...register("firstName")}
             placeholder="First Name"
-            className="input p-2 border rounded w-full"
+            className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          {errors.firstName && <span className="text-sm text-red-600">{errors.firstName.message}</span>}
+          {errors.firstName && <span className="text-xs text-red-500 mt-1">{errors.firstName.message}</span>}
 
           <input
             type="text"
             {...register("lastName")}
             placeholder="Last Name"
-            className="input p-2 border rounded w-full"
+            className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          {errors.lastName && <span className="text-sm text-red-600">{errors.lastName.message}</span>}
+          {errors.lastName && <span className="text-xs text-red-500 mt-1">{errors.lastName.message}</span>}
 
-          <select {...register("role")} className="input p-2 border rounded w-full">
+          <select {...register("role")} className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option value="">Select role</option>
             <option value="admin">Admin</option>
             <option value="student">Student</option>
             <option value="Landlord">Landlord</option>
           </select>
-          {errors.role && <span className="text-sm text-red-600">{errors.role.message}</span>}
+          {errors.role && <span className="text-xs text-red-500 mt-1">{errors.role.message}</span>}
 
-          <div className="flex justify-end gap-4 mt-4">
+          <div className="flex justify-end space-x-3 pt-4">
             <button
               type="button"
-              className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md"
               onClick={handleClose}
               disabled={isLoading}
             >
@@ -119,7 +119,7 @@ const UpdateProfile = ({ user, isOpen, onClose, refetch }: UpdateProfileProps) =
             </button>
             <button
               type="submit"
-              className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
+              className="cursor-pointer px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-60"
               disabled={isLoading}
             >
               {isLoading ? "Updating..." : "Update"}

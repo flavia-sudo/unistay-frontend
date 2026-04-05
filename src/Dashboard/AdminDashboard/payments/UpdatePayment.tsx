@@ -106,38 +106,40 @@ const UpdatePayment = ({ payment }: UpdatePaymentProps) => {
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Booking ID
                         </label>
-                        <input type="number" {...register("bookingId")} className="input input-bordered w-full max-w-xs" />
+                        <input type="number" {...register("bookingId")} className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         {errors.bookingId && <span className="text-red-500 text-xs">{errors.bookingId.message}</span>}
                     </div>
                     <div className="form-control w-full">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Amount
                         </label>
-                        <input type="number" step="0.01" {...register("amount")} className="input input-bordered w-full max-w-xs" />
+                        <input type="number" step="0.01" {...register("amount")} className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         {errors.amount && <span className="text-red-500 text-xs">{errors.amount.message}</span>}
                     </div>
                     <div className="form-control w-full">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Method
                         </label>
-                        <input type="text" {...register("method")} className="input input-bordered w-full max-w-xs" />
+                        <input type="text" {...register("method")} className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         {errors.method && <span className="text-red-500 text-xs">{errors.method.message}</span>}
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <input
-                        type="text"
-                        placeholder="e.g. pending"
-                        {...register("paymentStatus")}
-                        className="input input-bordered w-full"
-                        />
-                        {errors.paymentStatus && <p className="text-red-500 text-xs">{errors.paymentStatus.message}</p>}
+                        <label className="block text-sm font-medium mb-1">
+                            Status
+                        </label>
+                        <select {...register("paymentStatus")} className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Select Status</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                        {errors.paymentStatus && <span className="text-xs text-red-500 mt-1">{errors.paymentStatus.message}</span>}
                     </div>
                     {/* Action buttons */}
                     <div className="flex justify-end space-x-3 pt-4">
                         <button
                         type="button"
-                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md"
                         onClick={handleClose}
                         >
                         Cancel

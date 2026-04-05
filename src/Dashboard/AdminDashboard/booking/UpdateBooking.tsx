@@ -121,10 +121,10 @@ const schema = yup
             <input
               type="date"
               {...register("checkInDate")}
-              className="w-full px-3 py-2 border rounded-md"
+              className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             {errors.checkInDate && (
-              <p className="text-red-500 text-xs">
+              <p className="text-red-500 text-xs mt-1">
                 {errors.checkInDate.message}
               </p>
             )}
@@ -137,7 +137,7 @@ const schema = yup
             <input
               type="text"
               {...register("duration")}
-              className="w-full px-3 py-2 border rounded-md"
+              className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
@@ -148,7 +148,7 @@ const schema = yup
             <input
               type="number"
               {...register("totalAmount")}
-              className="w-full px-3 py-2 border rounded-md"
+              className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
@@ -160,18 +160,18 @@ const schema = yup
               {...register("bookingStatus", {
                 setValueAs: (value) => value === "true",
               })}
-              className="w-full px-3 py-2 border rounded-md"
+              className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="true">Confirmed</option>
               <option value="false">Cancelled</option>
             </select>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex justify-end spqace-x-3 pt-4">
             <button
               type="button"
               onClick={handleClose}
-              className="px-4 py-2 bg-gray-100 rounded-md"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md"
             >
               Cancel
             </button>
@@ -179,7 +179,7 @@ const schema = yup
             <button
               type="submit"
               disabled={isLoading}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md"
+              className="cursor-pointer px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-60"
             >
               {isLoading ? "Updating..." : "Update Booking"}
             </button>
