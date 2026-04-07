@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../app/store";
 import { hostelsAPI, type THostel } from "../../features/hostelAPI";
-import { roomsAPI, type TRoom } from "../../features/roomAPI";
 import { bookingsAPI, type TBooking } from "../../features/bookingAPI";
 import { paymentsAPI, type TPayment } from "../../features/paymentAPI";
 
@@ -18,7 +17,6 @@ const UserDashboard = () => {
   const userId = user?.userId;
 
   const { data: hostelsData } = hostelsAPI.useGetHostelsQuery();
-  const { data: roomsData }   = roomsAPI.useGetRoomsQuery();
 
   const { data: bookingsData } = bookingsAPI.useGetBookingByUserIdQuery(userId!, {
     skip: !userId,
@@ -29,17 +27,14 @@ const UserDashboard = () => {
     refetchOnMountOrArgChange: true,
   });
 
-  const hostels: THostel[]   = hostelsData || [];
-  const rooms: TRoom[]       = roomsData   || [];
+  const hostels: THostel[]   = hostelsData  || [];
   const bookings: TBooking[] = bookingsData || [];
   const payments: TPayment[] = paymentsData || [];
 
-  // Stats — scoped to this user only (data already user-filtered from API)
   const activeBookings  = bookings.filter(b => b.bookingStatus === true).length;
   const pendingPayments = payments.filter(p => p.paymentStatus === "Pending").length;
   const totalBookings   = bookings.length;
 
-  // ✅ Wire up search to filter the preview hostels
   const filteredHostels = hostels.filter(h =>
     h.hostelName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     h.location.toLowerCase().includes(searchQuery.toLowerCase())
@@ -52,6 +47,8 @@ const UserDashboard = () => {
       navigate("/dashboard/hostels");
     }
   };
+
+  const displayedHostels = searchQuery ? filteredHostels : hostels.slice(0, 3);
 
   return (
     <div className="flex-1 min-h-screen bg-slate-50 p-6 space-y-8">
@@ -93,23 +90,11 @@ const UserDashboard = () => {
         </div>
       </div>
 
-      {/* ── STATS ── overlaps header with negative margin */}
+      {/* ── STATS ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 px-4 -mt-10">
-        <StatCard
-          label="Active Bookings"
-          value={activeBookings}
-          valueClass="text-green-600"
-        />
-        <StatCard
-          label="Pending Payments"
-          value={pendingPayments}
-          valueClass="text-orange-500"
-        />
-        <StatCard
-          label="Total Bookings"
-          value={totalBookings}
-          valueClass="text-slate-800"
-        />
+        <StatCard label="Active Bookings"  value={activeBookings}  valueClass="text-green-600" />
+        <StatCard label="Pending Payments" value={pendingPayments} valueClass="text-orange-500" />
+        <StatCard label="Total Bookings"   value={totalBookings}   valueClass="text-slate-800" />
       </div>
 
       {/* ── QUICK ACTIONS ── */}
@@ -148,7 +133,7 @@ const UserDashboard = () => {
           </button>
         </div>
 
-        {filteredHostels.length === 0 ? (
+        {displayedHostels.length === 0 ? (
           <div className="flex flex-col items-center py-16 text-slate-400">
             <Building2 size={40} />
             <p className="mt-4">
@@ -165,35 +150,30 @@ const UserDashboard = () => {
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {(searchQuery ? filteredHostels : hostels.slice(0, 3)).map((hostel) => {
-              const hostelRooms = rooms.filter(r => r.hostelId === hostel.hostelId);
-              const lowestPrice = hostelRooms.length > 0
-                ? Math.min(...hostelRooms.map(r => Number(r.price)))
-                : null;
-
-              return (
-                <div
-                  key={hostel.hostelId}
-                  onClick={() => navigate(`/hostel/${hostel.hostelId}`)}
-                  className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden group"
-                >
-                  <div className="overflow-hidden h-40">
-                    <img
-                      src={hostel.image_URL}
-                      alt={hostel.hostelName}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-semibold text-lg text-slate-800">{hostel.hostelName}</h3>
-                    <p className="text-gray-500 text-sm">{hostel.location}</p>
-                    <p className="text-indigo-600 font-semibold mt-2">
-                      {lowestPrice !== null ? `Ksh ${lowestPrice.toLocaleString()}/sem` : "No rooms available"}
-                    </p>
-                  </div>
+            {displayedHostels.map((hostel) => (
+              <div
+                key={hostel.hostelId}
+                onClick={() => navigate(`/hostel/${hostel.hostelId}`)}
+                className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden group"
+              >
+                <div className="overflow-hidden h-40">
+                  <img
+                    src={hostel.image_URL}
+                    alt={hostel.hostelName}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
                 </div>
-              );
-            })}
+                <div className="p-4">
+                  <h3 className="font-semibold text-lg text-slate-800">{hostel.hostelName}</h3>
+                  <p className="text-gray-500 text-sm">{hostel.location}</p>
+                  <p className="text-indigo-600 font-semibold mt-2">
+                    {hostel.price
+                      ? `Ksh ${Number(hostel.price).toLocaleString()}/sem`
+                      : "No rooms available"}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
