@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   Search,
   Shield,
-  MessageSquare,
   CreditCard,
   SlidersHorizontal,
 } from "lucide-react";
@@ -34,11 +33,6 @@ const Features = () => {
       desc: "All properties are verified for your safety",
     },
     {
-      icon: <MessageSquare size={28} />,
-      title: "Direct Chat",
-      desc: "Chat directly with landlords",
-    },
-    {
       icon: <CreditCard size={28} />,
       title: "Secure Payments",
       desc: "Book and pay securely online",
@@ -64,7 +58,7 @@ const Features = () => {
       <div className="max-w-7xl mx-auto px-6">
 
         {/* FEATURES GRID */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
+        <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
           {features.map((item, index) => (
             <div
               key={index}
